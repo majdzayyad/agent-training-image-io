@@ -1,7 +1,5 @@
 # Adaptive Image Reads for Agent Training
 
-**Majd Zayyad**
-
 Does a smarter image reader finish a training job sooner, or just improve an I/O benchmark?
 
 This repository measures a C++ image reader, then feeds complete read-job durations into a fixed-work training scheduler. The scheduler includes model calls, tool computation, resource queues, verification, teardown and learner updates. It compares adaptive refill sizing with fixed sizes and a simple grow/reset rule.
