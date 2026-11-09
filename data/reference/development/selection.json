@@ -1,0 +1,15 @@
+{
+  "choice": {
+    "arm": "fixed64",
+    "geometric_process_wall_s": {
+      "fixed1024": 0.5050553650330639,
+      "fixed16": 0.3495180102910298,
+      "fixed256": 0.2710995059729839,
+      "fixed64": 0.23991634824198851
+    }
+  },
+  "created_utc": "2026-11-09T19:29:37.028750+00:00",
+  "development_directory": "training-v1-development",
+  "protocol_sha256": "99a629f0742f46478b1ce85a45abaa2ef1297542620d1263429f7afdd4931d33",
+  "runs_sha256": "04892897e3a111ca350f2c8e454d85986e422c886e9b58cca71af4673521b32c"
+}

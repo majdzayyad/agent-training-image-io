@@ -1,0 +1,94 @@
+{
+  "schema": 1,
+  "version": "training-time-v1",
+  "question": "When does adaptive image fetching reduce the completion time of a fixed-work, synchronous agent-training simulation?",
+  "author": "Majd Zayyad",
+  "primary_endpoint": "Simulated wall time through the final learner update, with identical completed rollouts, model calls, verification and update work.",
+  "cache_mib": 64,
+  "workers": 4,
+  "inflight_mib": 8,
+  "queue_feedback": "observable-only",
+  "repeats": 3,
+  "timeout_s": 60,
+  "order_seed": 2026110921,
+  "image": {
+    "bytes": 536870912,
+    "seed": 20261110,
+    "sha256": "1494e691a1d145fc18bbfde50ce2857db5c447c2d734e4ec3afa5dcdca2c0a19"
+  },
+  "profiles": {
+    "nearby": {"latency_us": 0, "bandwidth_mib": 0},
+    "latency": {"latency_us": 2000, "bandwidth_mib": 512},
+    "contended": {"latency_us": 500, "bandwidth_mib": 128}
+  },
+  "arms": {
+    "fixed16": {"binary": "reader", "policy": "fixed16"},
+    "fixed64": {"binary": "reader", "policy": "fixed64"},
+    "fixed256": {"binary": "reader", "policy": "fixed256"},
+    "fixed1024": {"binary": "reader", "policy": "fixed1024"},
+    "adaptive": {"binary": "reader", "policy": "adaptive-v1"},
+    "grow-reset": {"binary": "reader", "policy": "adaptive-v1", "rule": "grow-reset"}
+  },
+  "stages": {
+    "development": {
+      "seed": 27182818,
+      "clients": [8],
+      "patterns": {"random": 128, "sequential": 512, "mixed": 256},
+      "profiles": ["nearby", "latency", "contended"],
+      "arms": ["fixed16", "fixed64", "fixed256", "fixed1024"],
+      "expected_runs": 108
+    },
+    "evaluation": {
+      "seed": 31415926,
+      "clients": [1, 8, 32],
+      "patterns": {"random": 128, "sequential": 512, "mixed": 256},
+      "profiles": ["nearby", "latency", "contended"],
+      "arms": ["fixed16", "fixed64", "fixed256", "fixed1024", "adaptive", "grow-reset"],
+      "expected_runs": 486
+    },
+    "identity": {
+      "seed": 16180339,
+      "clients": [8],
+      "patterns": {"sequential": 512, "mixed": 256},
+      "profiles": ["contended"],
+      "identities": ["logical", "collapsed"],
+      "frontends": ["concurrent", "serialized"],
+      "arms": ["fixed16", "fixed64", "fixed256", "fixed1024", "adaptive", "grow-reset"],
+      "expected_runs": 144
+    }
+  },
+  "selection": "Choose the fixed size minimizing equal-case/equal-repeat geometric process wall time on development only; numerical size breaks exact ties. Freeze before evaluation.",
+  "simulation": {
+    "updates": 8,
+    "rollouts_per_update": 32,
+    "actors": 8,
+    "inference_workers": 4,
+    "cpu_workers": 4,
+    "tool_workers": 4,
+    "setup_s": 0.02,
+    "verification_s": 0.01,
+    "teardown_s": 0.01,
+    "schedule_seeds": [31415, 27182, 16180, 14142],
+    "service_jitter": [0.75, 1.25],
+    "profiles": {
+      "tool_wait": {"label": "Short non-I/O stages", "inference_s": 0.05, "cpu_s": 0.02, "learner_s": 0.2},
+      "model_wait": {"label": "Long model calls", "inference_s": 5.0, "cpu_s": 0.02, "learner_s": 0.2},
+      "cpu_wait": {"label": "Long tool computation", "inference_s": 0.05, "cpu_s": 5.0, "learner_s": 0.2},
+      "learner_wait": {"label": "Long learner updates", "inference_s": 0.05, "cpu_s": 0.02, "learner_s": 20.0}
+    },
+    "rollout_phases": ["setup", "model call", "measured image-read job", "additional tool CPU work", "model call", "verification", "teardown"],
+    "learner_rule": "Each update waits for all 32 assigned rollouts; no next-update rollout starts until that update finishes. All arms complete 256 rollouts and 8 updates.",
+    "service_input": "A measured total replay-process duration is the service time of one synthetic image-read tool job. It is not treated as pure storage latency or as an already-measured training speedup.",
+    "resource_rule": "Each tool worker represents an independently provisioned reader/backend budget with the calibration's resources. Separate workers do not secretly share one modeled bandwidth limit.",
+    "pairing": "Hold each measured repeat fixed across schedule seeds. The same work descriptors, jitter, task order, model/CPU/learner durations and resources are used for every policy.",
+    "inference": "Average schedule-seed log ratios within each calibration repeat, then form descriptive Student-t intervals across the three measured repeats. Schedule seeds are not additional physical measurements.",
+    "reported_primary": "Equal-weight geometric total-time ratios over all 27 evaluation conditions, separately for each training profile. Also report every condition, range, regressions, and the complete identity matrix.",
+    "not_modeled": ["Actual policy learning or time to a quality target", "Live LLM agents, rewards or task success distributions", "Cross-host 3FS/RDMA or shared-backend interference", "Warm-cache lifecycle reuse or compression translation", "An empirical distribution of production training workloads"]
+  },
+  "execution": {
+    "timing": "One physical calibration arm at a time; cold per-process reader, deliberately warmed backing file.",
+    "failures": "Retain every failure/timeout. Do not simulate or score an incomplete or invalid calibration matrix.",
+    "freeze": "Record source, protocol, input and binary hashes before/after calibration; preserve every condition and do not retune from evaluation outcomes.",
+    "scope": "A parameterized execution-time experiment, not actual RL training or a production DSec evaluation."
+  }
+}

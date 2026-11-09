@@ -1,0 +1,17 @@
+{
+  "description": "Reader source copied from the independently measured standalone-refill follow-up; no prior artifact is changed.",
+  "copied_files_sha256": {
+    "CMakeLists.txt": "0fc1dbd9bb76bfafb24cefcdc5eb7f8843b25153141423bb4f70bac5fc36b4b8",
+    ".clang-format": "6d2b6cc3a44f847579e3dba8e37bc21c37fbf092d5a92d6abd4b79abec9a7a3e",
+    "include/adaptive_io/io.hpp": "ca59bc4b81844882ebeacf9522d6b9b8b80e02615a961e2446e235afaa94e3e4",
+    "include/adaptive_io/policy.hpp": "085ef83262113b2da359aeaea87f0f64e2149d9b39eebb9278449043f8bbbca5",
+    "src/fetch_policy.cpp": "b9c2ab0aefe501ef758965f682f43ea59b1164e8f808b098ff9784a5ec177c33",
+    "src/image_reader.cpp": "a8c11c4f43917181c082be01f72a461fa85c09176d562392af6c9daff5b8ad67",
+    "src/remote_backend.cpp": "0c02c6f399108f8f1f6c234d1fa47e19f34e183c68ce55baf550c1420365138a",
+    "benchmarks/replay.cpp": "36268a806022192b389a541be922af7f78e4c38eb1b0d56ade96f35912b8cfc3",
+    "tests/io_tests.cpp": "3b80fec0bca04cf3bf2aaff70fb5af0006f34f9a5b2ddc2b300ef641fd80d219",
+    "tests/http_tests.py": "1fc23797a198bb1581bdefffe2fdc2216952f86bf249e8d2f3eb56324f3011a5",
+    "scripts/generate.py": "d38b9e96f1822bca0537d90f71bd303e06681e9d46b215eb234a79032070e4ee",
+    "scripts/range_server.py": "0eee6bf1460f7314a7859009644dca08a988448650324ef5bb7e06e5d5f0ddce"
+  }
+}

@@ -1,0 +1,3571 @@
+{
+  "binary_sha256": {
+    "reader": "6c8c7eb2ec48e1c969c4fdb53ac58dc241f2a1a4c2b79f78740fdc1959043e98"
+  },
+  "checksum_reference": "same frozen executable, local unshaped reads, before timing",
+  "compiler": "c++ (Ubuntu 13.3.0-6ubuntu2~24.04.1) 13.3.0",
+  "cpu_count": 12,
+  "image_bytes": 536870912,
+  "image_sha256": "1494e691a1d145fc18bbfde50ce2857db5c447c2d734e4ec3afa5dcdca2c0a19",
+  "kernel": "6.18.33.2-microsoft-standard-WSL2",
+  "protocol": {
+    "arms": {
+      "adaptive": {
+        "binary": "reader",
+        "policy": "adaptive-v1"
+      },
+      "fixed1024": {
+        "binary": "reader",
+        "policy": "fixed1024"
+      },
+      "fixed16": {
+        "binary": "reader",
+        "policy": "fixed16"
+      },
+      "fixed256": {
+        "binary": "reader",
+        "policy": "fixed256"
+      },
+      "fixed64": {
+        "binary": "reader",
+        "policy": "fixed64"
+      },
+      "grow-reset": {
+        "binary": "reader",
+        "policy": "adaptive-v1",
+        "rule": "grow-reset"
+      }
+    },
+    "author": "Majd Zayyad",
+    "cache_mib": 64,
+    "execution": {
+      "failures": "Retain every failure/timeout. Do not simulate or score an incomplete or invalid calibration matrix.",
+      "freeze": "Record source, protocol, input and binary hashes before/after calibration; preserve every condition and do not retune from evaluation outcomes.",
+      "scope": "A parameterized execution-time experiment, not actual RL training or a production DSec evaluation.",
+      "timing": "One physical calibration arm at a time; cold per-process reader, deliberately warmed backing file."
+    },
+    "image": {
+      "bytes": 536870912,
+      "seed": 20261110,
+      "sha256": "1494e691a1d145fc18bbfde50ce2857db5c447c2d734e4ec3afa5dcdca2c0a19"
+    },
+    "inflight_mib": 8,
+    "order_seed": 2026110921,
+    "primary_endpoint": "Simulated wall time through the final learner update, with identical completed rollouts, model calls, verification and update work.",
+    "profiles": {
+      "contended": {
+        "bandwidth_mib": 128,
+        "latency_us": 500
+      },
+      "latency": {
+        "bandwidth_mib": 512,
+        "latency_us": 2000
+      },
+      "nearby": {
+        "bandwidth_mib": 0,
+        "latency_us": 0
+      }
+    },
+    "question": "When does adaptive image fetching reduce the completion time of a fixed-work, synchronous agent-training simulation?",
+    "queue_feedback": "observable-only",
+    "repeats": 3,
+    "schema": 1,
+    "selection": "Choose the fixed size minimizing equal-case/equal-repeat geometric process wall time on development only; numerical size breaks exact ties. Freeze before evaluation.",
+    "simulation": {
+      "actors": 8,
+      "cpu_workers": 4,
+      "inference": "Average schedule-seed log ratios within each calibration repeat, then form descriptive Student-t intervals across the three measured repeats. Schedule seeds are not additional physical measurements.",
+      "inference_workers": 4,
+      "learner_rule": "Each update waits for all 32 assigned rollouts; no next-update rollout starts until that update finishes. All arms complete 256 rollouts and 8 updates.",
+      "not_modeled": [
+        "Actual policy learning or time to a quality target",
+        "Live LLM agents, rewards or task success distributions",
+        "Cross-host 3FS/RDMA or shared-backend interference",
+        "Warm-cache lifecycle reuse or compression translation",
+        "An empirical distribution of production training workloads"
+      ],
+      "pairing": "Hold each measured repeat fixed across schedule seeds. The same work descriptors, jitter, task order, model/CPU/learner durations and resources are used for every policy.",
+      "profiles": {
+        "cpu_wait": {
+          "cpu_s": 5.0,
+          "inference_s": 0.05,
+          "label": "Long tool computation",
+          "learner_s": 0.2
+        },
+        "learner_wait": {
+          "cpu_s": 0.02,
+          "inference_s": 0.05,
+          "label": "Long learner updates",
+          "learner_s": 20.0
+        },
+        "model_wait": {
+          "cpu_s": 0.02,
+          "inference_s": 5.0,
+          "label": "Long model calls",
+          "learner_s": 0.2
+        },
+        "tool_wait": {
+          "cpu_s": 0.02,
+          "inference_s": 0.05,
+          "label": "Short non-I/O stages",
+          "learner_s": 0.2
+        }
+      },
+      "reported_primary": "Equal-weight geometric total-time ratios over all 27 evaluation conditions, separately for each training profile. Also report every condition, range, regressions, and the complete identity matrix.",
+      "resource_rule": "Each tool worker represents an independently provisioned reader/backend budget with the calibration's resources. Separate workers do not secretly share one modeled bandwidth limit.",
+      "rollout_phases": [
+        "setup",
+        "model call",
+        "measured image-read job",
+        "additional tool CPU work",
+        "model call",
+        "verification",
+        "teardown"
+      ],
+      "rollouts_per_update": 32,
+      "schedule_seeds": [
+        31415,
+        27182,
+        16180,
+        14142
+      ],
+      "service_input": "A measured total replay-process duration is the service time of one synthetic image-read tool job. It is not treated as pure storage latency or as an already-measured training speedup.",
+      "service_jitter": [
+        0.75,
+        1.25
+      ],
+      "setup_s": 0.02,
+      "teardown_s": 0.01,
+      "tool_workers": 4,
+      "updates": 8,
+      "verification_s": 0.01
+    },
+    "stages": {
+      "development": {
+        "arms": [
+          "fixed16",
+          "fixed64",
+          "fixed256",
+          "fixed1024"
+        ],
+        "clients": [
+          8
+        ],
+        "expected_runs": 108,
+        "patterns": {
+          "mixed": 256,
+          "random": 128,
+          "sequential": 512
+        },
+        "profiles": [
+          "nearby",
+          "latency",
+          "contended"
+        ],
+        "seed": 27182818
+      },
+      "evaluation": {
+        "arms": [
+          "fixed16",
+          "fixed64",
+          "fixed256",
+          "fixed1024",
+          "adaptive",
+          "grow-reset"
+        ],
+        "clients": [
+          1,
+          8,
+          32
+        ],
+        "expected_runs": 486,
+        "patterns": {
+          "mixed": 256,
+          "random": 128,
+          "sequential": 512
+        },
+        "profiles": [
+          "nearby",
+          "latency",
+          "contended"
+        ],
+        "seed": 31415926
+      },
+      "identity": {
+        "arms": [
+          "fixed16",
+          "fixed64",
+          "fixed256",
+          "fixed1024",
+          "adaptive",
+          "grow-reset"
+        ],
+        "clients": [
+          8
+        ],
+        "expected_runs": 144,
+        "frontends": [
+          "concurrent",
+          "serialized"
+        ],
+        "identities": [
+          "logical",
+          "collapsed"
+        ],
+        "patterns": {
+          "mixed": 256,
+          "sequential": 512
+        },
+        "profiles": [
+          "contended"
+        ],
+        "seed": 16180339
+      }
+    },
+    "timeout_s": 60,
+    "version": "training-time-v1",
+    "workers": 4
+  },
+  "protocol_sha256": "99a629f0742f46478b1ce85a45abaa2ef1297542620d1263429f7afdd4931d33",
+  "python": "3.12.3",
+  "quiescence": {
+    "checked_utc": "2026-11-09T19:37:14.238761+00:00",
+    "competing_processes": [],
+    "dedicated_physical_host": false
+  },
+  "selection_frozen_before_evaluation": null,
+  "sequence": [
+    {
+      "arm": "grow-reset",
+      "case": {
+        "bandwidth_mib": 128,
+        "cache_mib": 64,
+        "clients": 8,
+        "expected_checksum": "c4fa6c297ca75881",
+        "frontend": "concurrent",
+        "id": "sequential-c8-contended-collapsed-concurrent",
+        "identity": "collapsed",
+        "latency_us": 500,
+        "pattern": "sequential",
+        "profile": "contended",
+        "queue": "observable-only",
+        "requests": 512,
+        "seed": 16180339,
+        "trace": {
+          "path": "traces/sequential-c8-s16180339.csv",
+          "sha256": "6c3b353fa7e868c5f626f69fdc93235cd5eaa8ea603ee25459eb9585cf7c3d10"
+        }
+      },
+      "repeat": 0
+    },
+    {
+      "arm": "fixed1024",
+      "case": {
+        "bandwidth_mib": 128,
+        "cache_mib": 64,
+        "clients": 8,
+        "expected_checksum": "c4fa6c297ca75881",
+        "frontend": "concurrent",
+        "id": "sequential-c8-contended-collapsed-concurrent",
+        "identity": "collapsed",
+        "latency_us": 500,
+        "pattern": "sequential",
+        "profile": "contended",
+        "queue": "observable-only",
+        "requests": 512,
+        "seed": 16180339,
+        "trace": {
+          "path": "traces/sequential-c8-s16180339.csv",
+          "sha256": "6c3b353fa7e868c5f626f69fdc93235cd5eaa8ea603ee25459eb9585cf7c3d10"
+        }
+      },
+      "repeat": 0
+    },
+    {
+      "arm": "adaptive",
+      "case": {
+        "bandwidth_mib": 128,
+        "cache_mib": 64,
+        "clients": 8,
+        "expected_checksum": "c4fa6c297ca75881",
+        "frontend": "concurrent",
+        "id": "sequential-c8-contended-collapsed-concurrent",
+        "identity": "collapsed",
+        "latency_us": 500,
+        "pattern": "sequential",
+        "profile": "contended",
+        "queue": "observable-only",
+        "requests": 512,
+        "seed": 16180339,
+        "trace": {
+          "path": "traces/sequential-c8-s16180339.csv",
+          "sha256": "6c3b353fa7e868c5f626f69fdc93235cd5eaa8ea603ee25459eb9585cf7c3d10"
+        }
+      },
+      "repeat": 0
+    },
+    {
+      "arm": "fixed64",
+      "case": {
+        "bandwidth_mib": 128,
+        "cache_mib": 64,
+        "clients": 8,
+        "expected_checksum": "c4fa6c297ca75881",
+        "frontend": "concurrent",
+        "id": "sequential-c8-contended-collapsed-concurrent",
+        "identity": "collapsed",
+        "latency_us": 500,
+        "pattern": "sequential",
+        "profile": "contended",
+        "queue": "observable-only",
+        "requests": 512,
+        "seed": 16180339,
+        "trace": {
+          "path": "traces/sequential-c8-s16180339.csv",
+          "sha256": "6c3b353fa7e868c5f626f69fdc93235cd5eaa8ea603ee25459eb9585cf7c3d10"
+        }
+      },
+      "repeat": 0
+    },
+    {
+      "arm": "fixed256",
+      "case": {
+        "bandwidth_mib": 128,
+        "cache_mib": 64,
+        "clients": 8,
+        "expected_checksum": "c4fa6c297ca75881",
+        "frontend": "concurrent",
+        "id": "sequential-c8-contended-collapsed-concurrent",
+        "identity": "collapsed",
+        "latency_us": 500,
+        "pattern": "sequential",
+        "profile": "contended",
+        "queue": "observable-only",
+        "requests": 512,
+        "seed": 16180339,
+        "trace": {
+          "path": "traces/sequential-c8-s16180339.csv",
+          "sha256": "6c3b353fa7e868c5f626f69fdc93235cd5eaa8ea603ee25459eb9585cf7c3d10"
+        }
+      },
+      "repeat": 0
+    },
+    {
+      "arm": "fixed16",
+      "case": {
+        "bandwidth_mib": 128,
+        "cache_mib": 64,
+        "clients": 8,
+        "expected_checksum": "c4fa6c297ca75881",
+        "frontend": "concurrent",
+        "id": "sequential-c8-contended-collapsed-concurrent",
+        "identity": "collapsed",
+        "latency_us": 500,
+        "pattern": "sequential",
+        "profile": "contended",
+        "queue": "observable-only",
+        "requests": 512,
+        "seed": 16180339,
+        "trace": {
+          "path": "traces/sequential-c8-s16180339.csv",
+          "sha256": "6c3b353fa7e868c5f626f69fdc93235cd5eaa8ea603ee25459eb9585cf7c3d10"
+        }
+      },
+      "repeat": 0
+    },
+    {
+      "arm": "fixed256",
+      "case": {
+        "bandwidth_mib": 128,
+        "cache_mib": 64,
+        "clients": 8,
+        "expected_checksum": "c4fa6c297ca75881",
+        "frontend": "concurrent",
+        "id": "sequential-c8-contended-logical-concurrent",
+        "identity": "logical",
+        "latency_us": 500,
+        "pattern": "sequential",
+        "profile": "contended",
+        "queue": "observable-only",
+        "requests": 512,
+        "seed": 16180339,
+        "trace": {
+          "path": "traces/sequential-c8-s16180339.csv",
+          "sha256": "6c3b353fa7e868c5f626f69fdc93235cd5eaa8ea603ee25459eb9585cf7c3d10"
+        }
+      },
+      "repeat": 0
+    },
+    {
+      "arm": "grow-reset",
+      "case": {
+        "bandwidth_mib": 128,
+        "cache_mib": 64,
+        "clients": 8,
+        "expected_checksum": "c4fa6c297ca75881",
+        "frontend": "concurrent",
+        "id": "sequential-c8-contended-logical-concurrent",
+        "identity": "logical",
+        "latency_us": 500,
+        "pattern": "sequential",
+        "profile": "contended",
+        "queue": "observable-only",
+        "requests": 512,
+        "seed": 16180339,
+        "trace": {
+          "path": "traces/sequential-c8-s16180339.csv",
+          "sha256": "6c3b353fa7e868c5f626f69fdc93235cd5eaa8ea603ee25459eb9585cf7c3d10"
+        }
+      },
+      "repeat": 0
+    },
+    {
+      "arm": "adaptive",
+      "case": {
+        "bandwidth_mib": 128,
+        "cache_mib": 64,
+        "clients": 8,
+        "expected_checksum": "c4fa6c297ca75881",
+        "frontend": "concurrent",
+        "id": "sequential-c8-contended-logical-concurrent",
+        "identity": "logical",
+        "latency_us": 500,
+        "pattern": "sequential",
+        "profile": "contended",
+        "queue": "observable-only",
+        "requests": 512,
+        "seed": 16180339,
+        "trace": {
+          "path": "traces/sequential-c8-s16180339.csv",
+          "sha256": "6c3b353fa7e868c5f626f69fdc93235cd5eaa8ea603ee25459eb9585cf7c3d10"
+        }
+      },
+      "repeat": 0
+    },
+    {
+      "arm": "fixed1024",
+      "case": {
+        "bandwidth_mib": 128,
+        "cache_mib": 64,
+        "clients": 8,
+        "expected_checksum": "c4fa6c297ca75881",
+        "frontend": "concurrent",
+        "id": "sequential-c8-contended-logical-concurrent",
+        "identity": "logical",
+        "latency_us": 500,
+        "pattern": "sequential",
+        "profile": "contended",
+        "queue": "observable-only",
+        "requests": 512,
+        "seed": 16180339,
+        "trace": {
+          "path": "traces/sequential-c8-s16180339.csv",
+          "sha256": "6c3b353fa7e868c5f626f69fdc93235cd5eaa8ea603ee25459eb9585cf7c3d10"
+        }
+      },
+      "repeat": 0
+    },
+    {
+      "arm": "fixed16",
+      "case": {
+        "bandwidth_mib": 128,
+        "cache_mib": 64,
+        "clients": 8,
+        "expected_checksum": "c4fa6c297ca75881",
+        "frontend": "concurrent",
+        "id": "sequential-c8-contended-logical-concurrent",
+        "identity": "logical",
+        "latency_us": 500,
+        "pattern": "sequential",
+        "profile": "contended",
+        "queue": "observable-only",
+        "requests": 512,
+        "seed": 16180339,
+        "trace": {
+          "path": "traces/sequential-c8-s16180339.csv",
+          "sha256": "6c3b353fa7e868c5f626f69fdc93235cd5eaa8ea603ee25459eb9585cf7c3d10"
+        }
+      },
+      "repeat": 0
+    },
+    {
+      "arm": "fixed64",
+      "case": {
+        "bandwidth_mib": 128,
+        "cache_mib": 64,
+        "clients": 8,
+        "expected_checksum": "c4fa6c297ca75881",
+        "frontend": "concurrent",
+        "id": "sequential-c8-contended-logical-concurrent",
+        "identity": "logical",
+        "latency_us": 500,
+        "pattern": "sequential",
+        "profile": "contended",
+        "queue": "observable-only",
+        "requests": 512,
+        "seed": 16180339,
+        "trace": {
+          "path": "traces/sequential-c8-s16180339.csv",
+          "sha256": "6c3b353fa7e868c5f626f69fdc93235cd5eaa8ea603ee25459eb9585cf7c3d10"
+        }
+      },
+      "repeat": 0
+    },
+    {
+      "arm": "fixed16",
+      "case": {
+        "bandwidth_mib": 128,
+        "cache_mib": 64,
+        "clients": 8,
+        "expected_checksum": "5696840d948c3a52",
+        "frontend": "serialized",
+        "id": "mixed-c8-contended-logical-serialized",
+        "identity": "logical",
+        "latency_us": 500,
+        "pattern": "mixed",
+        "profile": "contended",
+        "queue": "observable-only",
+        "requests": 256,
+        "seed": 16180339,
+        "trace": {
+          "path": "traces/mixed-c8-s16180339.csv",
+          "sha256": "ec12d65d3807bb2330786d6fdf6ee230ea9aab52a7ba9b38cefce257b6fab2ba"
+        }
+      },
+      "repeat": 0
+    },
+    {
+      "arm": "fixed64",
+      "case": {
+        "bandwidth_mib": 128,
+        "cache_mib": 64,
+        "clients": 8,
+        "expected_checksum": "5696840d948c3a52",
+        "frontend": "serialized",
+        "id": "mixed-c8-contended-logical-serialized",
+        "identity": "logical",
+        "latency_us": 500,
+        "pattern": "mixed",
+        "profile": "contended",
+        "queue": "observable-only",
+        "requests": 256,
+        "seed": 16180339,
+        "trace": {
+          "path": "traces/mixed-c8-s16180339.csv",
+          "sha256": "ec12d65d3807bb2330786d6fdf6ee230ea9aab52a7ba9b38cefce257b6fab2ba"
+        }
+      },
+      "repeat": 0
+    },
+    {
+      "arm": "grow-reset",
+      "case": {
+        "bandwidth_mib": 128,
+        "cache_mib": 64,
+        "clients": 8,
+        "expected_checksum": "5696840d948c3a52",
+        "frontend": "serialized",
+        "id": "mixed-c8-contended-logical-serialized",
+        "identity": "logical",
+        "latency_us": 500,
+        "pattern": "mixed",
+        "profile": "contended",
+        "queue": "observable-only",
+        "requests": 256,
+        "seed": 16180339,
+        "trace": {
+          "path": "traces/mixed-c8-s16180339.csv",
+          "sha256": "ec12d65d3807bb2330786d6fdf6ee230ea9aab52a7ba9b38cefce257b6fab2ba"
+        }
+      },
+      "repeat": 0
+    },
+    {
+      "arm": "fixed256",
+      "case": {
+        "bandwidth_mib": 128,
+        "cache_mib": 64,
+        "clients": 8,
+        "expected_checksum": "5696840d948c3a52",
+        "frontend": "serialized",
+        "id": "mixed-c8-contended-logical-serialized",
+        "identity": "logical",
+        "latency_us": 500,
+        "pattern": "mixed",
+        "profile": "contended",
+        "queue": "observable-only",
+        "requests": 256,
+        "seed": 16180339,
+        "trace": {
+          "path": "traces/mixed-c8-s16180339.csv",
+          "sha256": "ec12d65d3807bb2330786d6fdf6ee230ea9aab52a7ba9b38cefce257b6fab2ba"
+        }
+      },
+      "repeat": 0
+    },
+    {
+      "arm": "adaptive",
+      "case": {
+        "bandwidth_mib": 128,
+        "cache_mib": 64,
+        "clients": 8,
+        "expected_checksum": "5696840d948c3a52",
+        "frontend": "serialized",
+        "id": "mixed-c8-contended-logical-serialized",
+        "identity": "logical",
+        "latency_us": 500,
+        "pattern": "mixed",
+        "profile": "contended",
+        "queue": "observable-only",
+        "requests": 256,
+        "seed": 16180339,
+        "trace": {
+          "path": "traces/mixed-c8-s16180339.csv",
+          "sha256": "ec12d65d3807bb2330786d6fdf6ee230ea9aab52a7ba9b38cefce257b6fab2ba"
+        }
+      },
+      "repeat": 0
+    },
+    {
+      "arm": "fixed1024",
+      "case": {
+        "bandwidth_mib": 128,
+        "cache_mib": 64,
+        "clients": 8,
+        "expected_checksum": "5696840d948c3a52",
+        "frontend": "serialized",
+        "id": "mixed-c8-contended-logical-serialized",
+        "identity": "logical",
+        "latency_us": 500,
+        "pattern": "mixed",
+        "profile": "contended",
+        "queue": "observable-only",
+        "requests": 256,
+        "seed": 16180339,
+        "trace": {
+          "path": "traces/mixed-c8-s16180339.csv",
+          "sha256": "ec12d65d3807bb2330786d6fdf6ee230ea9aab52a7ba9b38cefce257b6fab2ba"
+        }
+      },
+      "repeat": 0
+    },
+    {
+      "arm": "fixed16",
+      "case": {
+        "bandwidth_mib": 128,
+        "cache_mib": 64,
+        "clients": 8,
+        "expected_checksum": "5696840d948c3a52",
+        "frontend": "serialized",
+        "id": "mixed-c8-contended-collapsed-serialized",
+        "identity": "collapsed",
+        "latency_us": 500,
+        "pattern": "mixed",
+        "profile": "contended",
+        "queue": "observable-only",
+        "requests": 256,
+        "seed": 16180339,
+        "trace": {
+          "path": "traces/mixed-c8-s16180339.csv",
+          "sha256": "ec12d65d3807bb2330786d6fdf6ee230ea9aab52a7ba9b38cefce257b6fab2ba"
+        }
+      },
+      "repeat": 0
+    },
+    {
+      "arm": "grow-reset",
+      "case": {
+        "bandwidth_mib": 128,
+        "cache_mib": 64,
+        "clients": 8,
+        "expected_checksum": "5696840d948c3a52",
+        "frontend": "serialized",
+        "id": "mixed-c8-contended-collapsed-serialized",
+        "identity": "collapsed",
+        "latency_us": 500,
+        "pattern": "mixed",
+        "profile": "contended",
+        "queue": "observable-only",
+        "requests": 256,
+        "seed": 16180339,
+        "trace": {
+          "path": "traces/mixed-c8-s16180339.csv",
+          "sha256": "ec12d65d3807bb2330786d6fdf6ee230ea9aab52a7ba9b38cefce257b6fab2ba"
+        }
+      },
+      "repeat": 0
+    },
+    {
+      "arm": "fixed1024",
+      "case": {
+        "bandwidth_mib": 128,
+        "cache_mib": 64,
+        "clients": 8,
+        "expected_checksum": "5696840d948c3a52",
+        "frontend": "serialized",
+        "id": "mixed-c8-contended-collapsed-serialized",
+        "identity": "collapsed",
+        "latency_us": 500,
+        "pattern": "mixed",
+        "profile": "contended",
+        "queue": "observable-only",
+        "requests": 256,
+        "seed": 16180339,
+        "trace": {
+          "path": "traces/mixed-c8-s16180339.csv",
+          "sha256": "ec12d65d3807bb2330786d6fdf6ee230ea9aab52a7ba9b38cefce257b6fab2ba"
+        }
+      },
+      "repeat": 0
+    },
+    {
+      "arm": "adaptive",
+      "case": {
+        "bandwidth_mib": 128,
+        "cache_mib": 64,
+        "clients": 8,
+        "expected_checksum": "5696840d948c3a52",
+        "frontend": "serialized",
+        "id": "mixed-c8-contended-collapsed-serialized",
+        "identity": "collapsed",
+        "latency_us": 500,
+        "pattern": "mixed",
+        "profile": "contended",
+        "queue": "observable-only",
+        "requests": 256,
+        "seed": 16180339,
+        "trace": {
+          "path": "traces/mixed-c8-s16180339.csv",
+          "sha256": "ec12d65d3807bb2330786d6fdf6ee230ea9aab52a7ba9b38cefce257b6fab2ba"
+        }
+      },
+      "repeat": 0
+    },
+    {
+      "arm": "fixed64",
+      "case": {
+        "bandwidth_mib": 128,
+        "cache_mib": 64,
+        "clients": 8,
+        "expected_checksum": "5696840d948c3a52",
+        "frontend": "serialized",
+        "id": "mixed-c8-contended-collapsed-serialized",
+        "identity": "collapsed",
+        "latency_us": 500,
+        "pattern": "mixed",
+        "profile": "contended",
+        "queue": "observable-only",
+        "requests": 256,
+        "seed": 16180339,
+        "trace": {
+          "path": "traces/mixed-c8-s16180339.csv",
+          "sha256": "ec12d65d3807bb2330786d6fdf6ee230ea9aab52a7ba9b38cefce257b6fab2ba"
+        }
+      },
+      "repeat": 0
+    },
+    {
+      "arm": "fixed256",
+      "case": {
+        "bandwidth_mib": 128,
+        "cache_mib": 64,
+        "clients": 8,
+        "expected_checksum": "5696840d948c3a52",
+        "frontend": "serialized",
+        "id": "mixed-c8-contended-collapsed-serialized",
+        "identity": "collapsed",
+        "latency_us": 500,
+        "pattern": "mixed",
+        "profile": "contended",
+        "queue": "observable-only",
+        "requests": 256,
+        "seed": 16180339,
+        "trace": {
+          "path": "traces/mixed-c8-s16180339.csv",
+          "sha256": "ec12d65d3807bb2330786d6fdf6ee230ea9aab52a7ba9b38cefce257b6fab2ba"
+        }
+      },
+      "repeat": 0
+    },
+    {
+      "arm": "grow-reset",
+      "case": {
+        "bandwidth_mib": 128,
+        "cache_mib": 64,
+        "clients": 8,
+        "expected_checksum": "c4fa6c297ca75881",
+        "frontend": "serialized",
+        "id": "sequential-c8-contended-logical-serialized",
+        "identity": "logical",
+        "latency_us": 500,
+        "pattern": "sequential",
+        "profile": "contended",
+        "queue": "observable-only",
+        "requests": 512,
+        "seed": 16180339,
+        "trace": {
+          "path": "traces/sequential-c8-s16180339.csv",
+          "sha256": "6c3b353fa7e868c5f626f69fdc93235cd5eaa8ea603ee25459eb9585cf7c3d10"
+        }
+      },
+      "repeat": 0
+    },
+    {
+      "arm": "fixed16",
+      "case": {
+        "bandwidth_mib": 128,
+        "cache_mib": 64,
+        "clients": 8,
+        "expected_checksum": "c4fa6c297ca75881",
+        "frontend": "serialized",
+        "id": "sequential-c8-contended-logical-serialized",
+        "identity": "logical",
+        "latency_us": 500,
+        "pattern": "sequential",
+        "profile": "contended",
+        "queue": "observable-only",
+        "requests": 512,
+        "seed": 16180339,
+        "trace": {
+          "path": "traces/sequential-c8-s16180339.csv",
+          "sha256": "6c3b353fa7e868c5f626f69fdc93235cd5eaa8ea603ee25459eb9585cf7c3d10"
+        }
+      },
+      "repeat": 0
+    },
+    {
+      "arm": "fixed256",
+      "case": {
+        "bandwidth_mib": 128,
+        "cache_mib": 64,
+        "clients": 8,
+        "expected_checksum": "c4fa6c297ca75881",
+        "frontend": "serialized",
+        "id": "sequential-c8-contended-logical-serialized",
+        "identity": "logical",
+        "latency_us": 500,
+        "pattern": "sequential",
+        "profile": "contended",
+        "queue": "observable-only",
+        "requests": 512,
+        "seed": 16180339,
+        "trace": {
+          "path": "traces/sequential-c8-s16180339.csv",
+          "sha256": "6c3b353fa7e868c5f626f69fdc93235cd5eaa8ea603ee25459eb9585cf7c3d10"
+        }
+      },
+      "repeat": 0
+    },
+    {
+      "arm": "fixed1024",
+      "case": {
+        "bandwidth_mib": 128,
+        "cache_mib": 64,
+        "clients": 8,
+        "expected_checksum": "c4fa6c297ca75881",
+        "frontend": "serialized",
+        "id": "sequential-c8-contended-logical-serialized",
+        "identity": "logical",
+        "latency_us": 500,
+        "pattern": "sequential",
+        "profile": "contended",
+        "queue": "observable-only",
+        "requests": 512,
+        "seed": 16180339,
+        "trace": {
+          "path": "traces/sequential-c8-s16180339.csv",
+          "sha256": "6c3b353fa7e868c5f626f69fdc93235cd5eaa8ea603ee25459eb9585cf7c3d10"
+        }
+      },
+      "repeat": 0
+    },
+    {
+      "arm": "adaptive",
+      "case": {
+        "bandwidth_mib": 128,
+        "cache_mib": 64,
+        "clients": 8,
+        "expected_checksum": "c4fa6c297ca75881",
+        "frontend": "serialized",
+        "id": "sequential-c8-contended-logical-serialized",
+        "identity": "logical",
+        "latency_us": 500,
+        "pattern": "sequential",
+        "profile": "contended",
+        "queue": "observable-only",
+        "requests": 512,
+        "seed": 16180339,
+        "trace": {
+          "path": "traces/sequential-c8-s16180339.csv",
+          "sha256": "6c3b353fa7e868c5f626f69fdc93235cd5eaa8ea603ee25459eb9585cf7c3d10"
+        }
+      },
+      "repeat": 0
+    },
+    {
+      "arm": "fixed64",
+      "case": {
+        "bandwidth_mib": 128,
+        "cache_mib": 64,
+        "clients": 8,
+        "expected_checksum": "c4fa6c297ca75881",
+        "frontend": "serialized",
+        "id": "sequential-c8-contended-logical-serialized",
+        "identity": "logical",
+        "latency_us": 500,
+        "pattern": "sequential",
+        "profile": "contended",
+        "queue": "observable-only",
+        "requests": 512,
+        "seed": 16180339,
+        "trace": {
+          "path": "traces/sequential-c8-s16180339.csv",
+          "sha256": "6c3b353fa7e868c5f626f69fdc93235cd5eaa8ea603ee25459eb9585cf7c3d10"
+        }
+      },
+      "repeat": 0
+    },
+    {
+      "arm": "adaptive",
+      "case": {
+        "bandwidth_mib": 128,
+        "cache_mib": 64,
+        "clients": 8,
+        "expected_checksum": "c4fa6c297ca75881",
+        "frontend": "serialized",
+        "id": "sequential-c8-contended-collapsed-serialized",
+        "identity": "collapsed",
+        "latency_us": 500,
+        "pattern": "sequential",
+        "profile": "contended",
+        "queue": "observable-only",
+        "requests": 512,
+        "seed": 16180339,
+        "trace": {
+          "path": "traces/sequential-c8-s16180339.csv",
+          "sha256": "6c3b353fa7e868c5f626f69fdc93235cd5eaa8ea603ee25459eb9585cf7c3d10"
+        }
+      },
+      "repeat": 0
+    },
+    {
+      "arm": "grow-reset",
+      "case": {
+        "bandwidth_mib": 128,
+        "cache_mib": 64,
+        "clients": 8,
+        "expected_checksum": "c4fa6c297ca75881",
+        "frontend": "serialized",
+        "id": "sequential-c8-contended-collapsed-serialized",
+        "identity": "collapsed",
+        "latency_us": 500,
+        "pattern": "sequential",
+        "profile": "contended",
+        "queue": "observable-only",
+        "requests": 512,
+        "seed": 16180339,
+        "trace": {
+          "path": "traces/sequential-c8-s16180339.csv",
+          "sha256": "6c3b353fa7e868c5f626f69fdc93235cd5eaa8ea603ee25459eb9585cf7c3d10"
+        }
+      },
+      "repeat": 0
+    },
+    {
+      "arm": "fixed64",
+      "case": {
+        "bandwidth_mib": 128,
+        "cache_mib": 64,
+        "clients": 8,
+        "expected_checksum": "c4fa6c297ca75881",
+        "frontend": "serialized",
+        "id": "sequential-c8-contended-collapsed-serialized",
+        "identity": "collapsed",
+        "latency_us": 500,
+        "pattern": "sequential",
+        "profile": "contended",
+        "queue": "observable-only",
+        "requests": 512,
+        "seed": 16180339,
+        "trace": {
+          "path": "traces/sequential-c8-s16180339.csv",
+          "sha256": "6c3b353fa7e868c5f626f69fdc93235cd5eaa8ea603ee25459eb9585cf7c3d10"
+        }
+      },
+      "repeat": 0
+    },
+    {
+      "arm": "fixed16",
+      "case": {
+        "bandwidth_mib": 128,
+        "cache_mib": 64,
+        "clients": 8,
+        "expected_checksum": "c4fa6c297ca75881",
+        "frontend": "serialized",
+        "id": "sequential-c8-contended-collapsed-serialized",
+        "identity": "collapsed",
+        "latency_us": 500,
+        "pattern": "sequential",
+        "profile": "contended",
+        "queue": "observable-only",
+        "requests": 512,
+        "seed": 16180339,
+        "trace": {
+          "path": "traces/sequential-c8-s16180339.csv",
+          "sha256": "6c3b353fa7e868c5f626f69fdc93235cd5eaa8ea603ee25459eb9585cf7c3d10"
+        }
+      },
+      "repeat": 0
+    },
+    {
+      "arm": "fixed1024",
+      "case": {
+        "bandwidth_mib": 128,
+        "cache_mib": 64,
+        "clients": 8,
+        "expected_checksum": "c4fa6c297ca75881",
+        "frontend": "serialized",
+        "id": "sequential-c8-contended-collapsed-serialized",
+        "identity": "collapsed",
+        "latency_us": 500,
+        "pattern": "sequential",
+        "profile": "contended",
+        "queue": "observable-only",
+        "requests": 512,
+        "seed": 16180339,
+        "trace": {
+          "path": "traces/sequential-c8-s16180339.csv",
+          "sha256": "6c3b353fa7e868c5f626f69fdc93235cd5eaa8ea603ee25459eb9585cf7c3d10"
+        }
+      },
+      "repeat": 0
+    },
+    {
+      "arm": "fixed256",
+      "case": {
+        "bandwidth_mib": 128,
+        "cache_mib": 64,
+        "clients": 8,
+        "expected_checksum": "c4fa6c297ca75881",
+        "frontend": "serialized",
+        "id": "sequential-c8-contended-collapsed-serialized",
+        "identity": "collapsed",
+        "latency_us": 500,
+        "pattern": "sequential",
+        "profile": "contended",
+        "queue": "observable-only",
+        "requests": 512,
+        "seed": 16180339,
+        "trace": {
+          "path": "traces/sequential-c8-s16180339.csv",
+          "sha256": "6c3b353fa7e868c5f626f69fdc93235cd5eaa8ea603ee25459eb9585cf7c3d10"
+        }
+      },
+      "repeat": 0
+    },
+    {
+      "arm": "fixed1024",
+      "case": {
+        "bandwidth_mib": 128,
+        "cache_mib": 64,
+        "clients": 8,
+        "expected_checksum": "5696840d948c3a52",
+        "frontend": "concurrent",
+        "id": "mixed-c8-contended-collapsed-concurrent",
+        "identity": "collapsed",
+        "latency_us": 500,
+        "pattern": "mixed",
+        "profile": "contended",
+        "queue": "observable-only",
+        "requests": 256,
+        "seed": 16180339,
+        "trace": {
+          "path": "traces/mixed-c8-s16180339.csv",
+          "sha256": "ec12d65d3807bb2330786d6fdf6ee230ea9aab52a7ba9b38cefce257b6fab2ba"
+        }
+      },
+      "repeat": 0
+    },
+    {
+      "arm": "adaptive",
+      "case": {
+        "bandwidth_mib": 128,
+        "cache_mib": 64,
+        "clients": 8,
+        "expected_checksum": "5696840d948c3a52",
+        "frontend": "concurrent",
+        "id": "mixed-c8-contended-collapsed-concurrent",
+        "identity": "collapsed",
+        "latency_us": 500,
+        "pattern": "mixed",
+        "profile": "contended",
+        "queue": "observable-only",
+        "requests": 256,
+        "seed": 16180339,
+        "trace": {
+          "path": "traces/mixed-c8-s16180339.csv",
+          "sha256": "ec12d65d3807bb2330786d6fdf6ee230ea9aab52a7ba9b38cefce257b6fab2ba"
+        }
+      },
+      "repeat": 0
+    },
+    {
+      "arm": "fixed256",
+      "case": {
+        "bandwidth_mib": 128,
+        "cache_mib": 64,
+        "clients": 8,
+        "expected_checksum": "5696840d948c3a52",
+        "frontend": "concurrent",
+        "id": "mixed-c8-contended-collapsed-concurrent",
+        "identity": "collapsed",
+        "latency_us": 500,
+        "pattern": "mixed",
+        "profile": "contended",
+        "queue": "observable-only",
+        "requests": 256,
+        "seed": 16180339,
+        "trace": {
+          "path": "traces/mixed-c8-s16180339.csv",
+          "sha256": "ec12d65d3807bb2330786d6fdf6ee230ea9aab52a7ba9b38cefce257b6fab2ba"
+        }
+      },
+      "repeat": 0
+    },
+    {
+      "arm": "grow-reset",
+      "case": {
+        "bandwidth_mib": 128,
+        "cache_mib": 64,
+        "clients": 8,
+        "expected_checksum": "5696840d948c3a52",
+        "frontend": "concurrent",
+        "id": "mixed-c8-contended-collapsed-concurrent",
+        "identity": "collapsed",
+        "latency_us": 500,
+        "pattern": "mixed",
+        "profile": "contended",
+        "queue": "observable-only",
+        "requests": 256,
+        "seed": 16180339,
+        "trace": {
+          "path": "traces/mixed-c8-s16180339.csv",
+          "sha256": "ec12d65d3807bb2330786d6fdf6ee230ea9aab52a7ba9b38cefce257b6fab2ba"
+        }
+      },
+      "repeat": 0
+    },
+    {
+      "arm": "fixed64",
+      "case": {
+        "bandwidth_mib": 128,
+        "cache_mib": 64,
+        "clients": 8,
+        "expected_checksum": "5696840d948c3a52",
+        "frontend": "concurrent",
+        "id": "mixed-c8-contended-collapsed-concurrent",
+        "identity": "collapsed",
+        "latency_us": 500,
+        "pattern": "mixed",
+        "profile": "contended",
+        "queue": "observable-only",
+        "requests": 256,
+        "seed": 16180339,
+        "trace": {
+          "path": "traces/mixed-c8-s16180339.csv",
+          "sha256": "ec12d65d3807bb2330786d6fdf6ee230ea9aab52a7ba9b38cefce257b6fab2ba"
+        }
+      },
+      "repeat": 0
+    },
+    {
+      "arm": "fixed16",
+      "case": {
+        "bandwidth_mib": 128,
+        "cache_mib": 64,
+        "clients": 8,
+        "expected_checksum": "5696840d948c3a52",
+        "frontend": "concurrent",
+        "id": "mixed-c8-contended-collapsed-concurrent",
+        "identity": "collapsed",
+        "latency_us": 500,
+        "pattern": "mixed",
+        "profile": "contended",
+        "queue": "observable-only",
+        "requests": 256,
+        "seed": 16180339,
+        "trace": {
+          "path": "traces/mixed-c8-s16180339.csv",
+          "sha256": "ec12d65d3807bb2330786d6fdf6ee230ea9aab52a7ba9b38cefce257b6fab2ba"
+        }
+      },
+      "repeat": 0
+    },
+    {
+      "arm": "fixed16",
+      "case": {
+        "bandwidth_mib": 128,
+        "cache_mib": 64,
+        "clients": 8,
+        "expected_checksum": "5696840d948c3a52",
+        "frontend": "concurrent",
+        "id": "mixed-c8-contended-logical-concurrent",
+        "identity": "logical",
+        "latency_us": 500,
+        "pattern": "mixed",
+        "profile": "contended",
+        "queue": "observable-only",
+        "requests": 256,
+        "seed": 16180339,
+        "trace": {
+          "path": "traces/mixed-c8-s16180339.csv",
+          "sha256": "ec12d65d3807bb2330786d6fdf6ee230ea9aab52a7ba9b38cefce257b6fab2ba"
+        }
+      },
+      "repeat": 0
+    },
+    {
+      "arm": "fixed1024",
+      "case": {
+        "bandwidth_mib": 128,
+        "cache_mib": 64,
+        "clients": 8,
+        "expected_checksum": "5696840d948c3a52",
+        "frontend": "concurrent",
+        "id": "mixed-c8-contended-logical-concurrent",
+        "identity": "logical",
+        "latency_us": 500,
+        "pattern": "mixed",
+        "profile": "contended",
+        "queue": "observable-only",
+        "requests": 256,
+        "seed": 16180339,
+        "trace": {
+          "path": "traces/mixed-c8-s16180339.csv",
+          "sha256": "ec12d65d3807bb2330786d6fdf6ee230ea9aab52a7ba9b38cefce257b6fab2ba"
+        }
+      },
+      "repeat": 0
+    },
+    {
+      "arm": "fixed64",
+      "case": {
+        "bandwidth_mib": 128,
+        "cache_mib": 64,
+        "clients": 8,
+        "expected_checksum": "5696840d948c3a52",
+        "frontend": "concurrent",
+        "id": "mixed-c8-contended-logical-concurrent",
+        "identity": "logical",
+        "latency_us": 500,
+        "pattern": "mixed",
+        "profile": "contended",
+        "queue": "observable-only",
+        "requests": 256,
+        "seed": 16180339,
+        "trace": {
+          "path": "traces/mixed-c8-s16180339.csv",
+          "sha256": "ec12d65d3807bb2330786d6fdf6ee230ea9aab52a7ba9b38cefce257b6fab2ba"
+        }
+      },
+      "repeat": 0
+    },
+    {
+      "arm": "adaptive",
+      "case": {
+        "bandwidth_mib": 128,
+        "cache_mib": 64,
+        "clients": 8,
+        "expected_checksum": "5696840d948c3a52",
+        "frontend": "concurrent",
+        "id": "mixed-c8-contended-logical-concurrent",
+        "identity": "logical",
+        "latency_us": 500,
+        "pattern": "mixed",
+        "profile": "contended",
+        "queue": "observable-only",
+        "requests": 256,
+        "seed": 16180339,
+        "trace": {
+          "path": "traces/mixed-c8-s16180339.csv",
+          "sha256": "ec12d65d3807bb2330786d6fdf6ee230ea9aab52a7ba9b38cefce257b6fab2ba"
+        }
+      },
+      "repeat": 0
+    },
+    {
+      "arm": "fixed256",
+      "case": {
+        "bandwidth_mib": 128,
+        "cache_mib": 64,
+        "clients": 8,
+        "expected_checksum": "5696840d948c3a52",
+        "frontend": "concurrent",
+        "id": "mixed-c8-contended-logical-concurrent",
+        "identity": "logical",
+        "latency_us": 500,
+        "pattern": "mixed",
+        "profile": "contended",
+        "queue": "observable-only",
+        "requests": 256,
+        "seed": 16180339,
+        "trace": {
+          "path": "traces/mixed-c8-s16180339.csv",
+          "sha256": "ec12d65d3807bb2330786d6fdf6ee230ea9aab52a7ba9b38cefce257b6fab2ba"
+        }
+      },
+      "repeat": 0
+    },
+    {
+      "arm": "grow-reset",
+      "case": {
+        "bandwidth_mib": 128,
+        "cache_mib": 64,
+        "clients": 8,
+        "expected_checksum": "5696840d948c3a52",
+        "frontend": "concurrent",
+        "id": "mixed-c8-contended-logical-concurrent",
+        "identity": "logical",
+        "latency_us": 500,
+        "pattern": "mixed",
+        "profile": "contended",
+        "queue": "observable-only",
+        "requests": 256,
+        "seed": 16180339,
+        "trace": {
+          "path": "traces/mixed-c8-s16180339.csv",
+          "sha256": "ec12d65d3807bb2330786d6fdf6ee230ea9aab52a7ba9b38cefce257b6fab2ba"
+        }
+      },
+      "repeat": 0
+    },
+    {
+      "arm": "fixed16",
+      "case": {
+        "bandwidth_mib": 128,
+        "cache_mib": 64,
+        "clients": 8,
+        "expected_checksum": "5696840d948c3a52",
+        "frontend": "serialized",
+        "id": "mixed-c8-contended-collapsed-serialized",
+        "identity": "collapsed",
+        "latency_us": 500,
+        "pattern": "mixed",
+        "profile": "contended",
+        "queue": "observable-only",
+        "requests": 256,
+        "seed": 16180339,
+        "trace": {
+          "path": "traces/mixed-c8-s16180339.csv",
+          "sha256": "ec12d65d3807bb2330786d6fdf6ee230ea9aab52a7ba9b38cefce257b6fab2ba"
+        }
+      },
+      "repeat": 1
+    },
+    {
+      "arm": "adaptive",
+      "case": {
+        "bandwidth_mib": 128,
+        "cache_mib": 64,
+        "clients": 8,
+        "expected_checksum": "5696840d948c3a52",
+        "frontend": "serialized",
+        "id": "mixed-c8-contended-collapsed-serialized",
+        "identity": "collapsed",
+        "latency_us": 500,
+        "pattern": "mixed",
+        "profile": "contended",
+        "queue": "observable-only",
+        "requests": 256,
+        "seed": 16180339,
+        "trace": {
+          "path": "traces/mixed-c8-s16180339.csv",
+          "sha256": "ec12d65d3807bb2330786d6fdf6ee230ea9aab52a7ba9b38cefce257b6fab2ba"
+        }
+      },
+      "repeat": 1
+    },
+    {
+      "arm": "fixed256",
+      "case": {
+        "bandwidth_mib": 128,
+        "cache_mib": 64,
+        "clients": 8,
+        "expected_checksum": "5696840d948c3a52",
+        "frontend": "serialized",
+        "id": "mixed-c8-contended-collapsed-serialized",
+        "identity": "collapsed",
+        "latency_us": 500,
+        "pattern": "mixed",
+        "profile": "contended",
+        "queue": "observable-only",
+        "requests": 256,
+        "seed": 16180339,
+        "trace": {
+          "path": "traces/mixed-c8-s16180339.csv",
+          "sha256": "ec12d65d3807bb2330786d6fdf6ee230ea9aab52a7ba9b38cefce257b6fab2ba"
+        }
+      },
+      "repeat": 1
+    },
+    {
+      "arm": "fixed1024",
+      "case": {
+        "bandwidth_mib": 128,
+        "cache_mib": 64,
+        "clients": 8,
+        "expected_checksum": "5696840d948c3a52",
+        "frontend": "serialized",
+        "id": "mixed-c8-contended-collapsed-serialized",
+        "identity": "collapsed",
+        "latency_us": 500,
+        "pattern": "mixed",
+        "profile": "contended",
+        "queue": "observable-only",
+        "requests": 256,
+        "seed": 16180339,
+        "trace": {
+          "path": "traces/mixed-c8-s16180339.csv",
+          "sha256": "ec12d65d3807bb2330786d6fdf6ee230ea9aab52a7ba9b38cefce257b6fab2ba"
+        }
+      },
+      "repeat": 1
+    },
+    {
+      "arm": "fixed64",
+      "case": {
+        "bandwidth_mib": 128,
+        "cache_mib": 64,
+        "clients": 8,
+        "expected_checksum": "5696840d948c3a52",
+        "frontend": "serialized",
+        "id": "mixed-c8-contended-collapsed-serialized",
+        "identity": "collapsed",
+        "latency_us": 500,
+        "pattern": "mixed",
+        "profile": "contended",
+        "queue": "observable-only",
+        "requests": 256,
+        "seed": 16180339,
+        "trace": {
+          "path": "traces/mixed-c8-s16180339.csv",
+          "sha256": "ec12d65d3807bb2330786d6fdf6ee230ea9aab52a7ba9b38cefce257b6fab2ba"
+        }
+      },
+      "repeat": 1
+    },
+    {
+      "arm": "grow-reset",
+      "case": {
+        "bandwidth_mib": 128,
+        "cache_mib": 64,
+        "clients": 8,
+        "expected_checksum": "5696840d948c3a52",
+        "frontend": "serialized",
+        "id": "mixed-c8-contended-collapsed-serialized",
+        "identity": "collapsed",
+        "latency_us": 500,
+        "pattern": "mixed",
+        "profile": "contended",
+        "queue": "observable-only",
+        "requests": 256,
+        "seed": 16180339,
+        "trace": {
+          "path": "traces/mixed-c8-s16180339.csv",
+          "sha256": "ec12d65d3807bb2330786d6fdf6ee230ea9aab52a7ba9b38cefce257b6fab2ba"
+        }
+      },
+      "repeat": 1
+    },
+    {
+      "arm": "fixed16",
+      "case": {
+        "bandwidth_mib": 128,
+        "cache_mib": 64,
+        "clients": 8,
+        "expected_checksum": "c4fa6c297ca75881",
+        "frontend": "serialized",
+        "id": "sequential-c8-contended-logical-serialized",
+        "identity": "logical",
+        "latency_us": 500,
+        "pattern": "sequential",
+        "profile": "contended",
+        "queue": "observable-only",
+        "requests": 512,
+        "seed": 16180339,
+        "trace": {
+          "path": "traces/sequential-c8-s16180339.csv",
+          "sha256": "6c3b353fa7e868c5f626f69fdc93235cd5eaa8ea603ee25459eb9585cf7c3d10"
+        }
+      },
+      "repeat": 1
+    },
+    {
+      "arm": "fixed64",
+      "case": {
+        "bandwidth_mib": 128,
+        "cache_mib": 64,
+        "clients": 8,
+        "expected_checksum": "c4fa6c297ca75881",
+        "frontend": "serialized",
+        "id": "sequential-c8-contended-logical-serialized",
+        "identity": "logical",
+        "latency_us": 500,
+        "pattern": "sequential",
+        "profile": "contended",
+        "queue": "observable-only",
+        "requests": 512,
+        "seed": 16180339,
+        "trace": {
+          "path": "traces/sequential-c8-s16180339.csv",
+          "sha256": "6c3b353fa7e868c5f626f69fdc93235cd5eaa8ea603ee25459eb9585cf7c3d10"
+        }
+      },
+      "repeat": 1
+    },
+    {
+      "arm": "adaptive",
+      "case": {
+        "bandwidth_mib": 128,
+        "cache_mib": 64,
+        "clients": 8,
+        "expected_checksum": "c4fa6c297ca75881",
+        "frontend": "serialized",
+        "id": "sequential-c8-contended-logical-serialized",
+        "identity": "logical",
+        "latency_us": 500,
+        "pattern": "sequential",
+        "profile": "contended",
+        "queue": "observable-only",
+        "requests": 512,
+        "seed": 16180339,
+        "trace": {
+          "path": "traces/sequential-c8-s16180339.csv",
+          "sha256": "6c3b353fa7e868c5f626f69fdc93235cd5eaa8ea603ee25459eb9585cf7c3d10"
+        }
+      },
+      "repeat": 1
+    },
+    {
+      "arm": "fixed1024",
+      "case": {
+        "bandwidth_mib": 128,
+        "cache_mib": 64,
+        "clients": 8,
+        "expected_checksum": "c4fa6c297ca75881",
+        "frontend": "serialized",
+        "id": "sequential-c8-contended-logical-serialized",
+        "identity": "logical",
+        "latency_us": 500,
+        "pattern": "sequential",
+        "profile": "contended",
+        "queue": "observable-only",
+        "requests": 512,
+        "seed": 16180339,
+        "trace": {
+          "path": "traces/sequential-c8-s16180339.csv",
+          "sha256": "6c3b353fa7e868c5f626f69fdc93235cd5eaa8ea603ee25459eb9585cf7c3d10"
+        }
+      },
+      "repeat": 1
+    },
+    {
+      "arm": "fixed256",
+      "case": {
+        "bandwidth_mib": 128,
+        "cache_mib": 64,
+        "clients": 8,
+        "expected_checksum": "c4fa6c297ca75881",
+        "frontend": "serialized",
+        "id": "sequential-c8-contended-logical-serialized",
+        "identity": "logical",
+        "latency_us": 500,
+        "pattern": "sequential",
+        "profile": "contended",
+        "queue": "observable-only",
+        "requests": 512,
+        "seed": 16180339,
+        "trace": {
+          "path": "traces/sequential-c8-s16180339.csv",
+          "sha256": "6c3b353fa7e868c5f626f69fdc93235cd5eaa8ea603ee25459eb9585cf7c3d10"
+        }
+      },
+      "repeat": 1
+    },
+    {
+      "arm": "grow-reset",
+      "case": {
+        "bandwidth_mib": 128,
+        "cache_mib": 64,
+        "clients": 8,
+        "expected_checksum": "c4fa6c297ca75881",
+        "frontend": "serialized",
+        "id": "sequential-c8-contended-logical-serialized",
+        "identity": "logical",
+        "latency_us": 500,
+        "pattern": "sequential",
+        "profile": "contended",
+        "queue": "observable-only",
+        "requests": 512,
+        "seed": 16180339,
+        "trace": {
+          "path": "traces/sequential-c8-s16180339.csv",
+          "sha256": "6c3b353fa7e868c5f626f69fdc93235cd5eaa8ea603ee25459eb9585cf7c3d10"
+        }
+      },
+      "repeat": 1
+    },
+    {
+      "arm": "grow-reset",
+      "case": {
+        "bandwidth_mib": 128,
+        "cache_mib": 64,
+        "clients": 8,
+        "expected_checksum": "c4fa6c297ca75881",
+        "frontend": "concurrent",
+        "id": "sequential-c8-contended-logical-concurrent",
+        "identity": "logical",
+        "latency_us": 500,
+        "pattern": "sequential",
+        "profile": "contended",
+        "queue": "observable-only",
+        "requests": 512,
+        "seed": 16180339,
+        "trace": {
+          "path": "traces/sequential-c8-s16180339.csv",
+          "sha256": "6c3b353fa7e868c5f626f69fdc93235cd5eaa8ea603ee25459eb9585cf7c3d10"
+        }
+      },
+      "repeat": 1
+    },
+    {
+      "arm": "fixed16",
+      "case": {
+        "bandwidth_mib": 128,
+        "cache_mib": 64,
+        "clients": 8,
+        "expected_checksum": "c4fa6c297ca75881",
+        "frontend": "concurrent",
+        "id": "sequential-c8-contended-logical-concurrent",
+        "identity": "logical",
+        "latency_us": 500,
+        "pattern": "sequential",
+        "profile": "contended",
+        "queue": "observable-only",
+        "requests": 512,
+        "seed": 16180339,
+        "trace": {
+          "path": "traces/sequential-c8-s16180339.csv",
+          "sha256": "6c3b353fa7e868c5f626f69fdc93235cd5eaa8ea603ee25459eb9585cf7c3d10"
+        }
+      },
+      "repeat": 1
+    },
+    {
+      "arm": "adaptive",
+      "case": {
+        "bandwidth_mib": 128,
+        "cache_mib": 64,
+        "clients": 8,
+        "expected_checksum": "c4fa6c297ca75881",
+        "frontend": "concurrent",
+        "id": "sequential-c8-contended-logical-concurrent",
+        "identity": "logical",
+        "latency_us": 500,
+        "pattern": "sequential",
+        "profile": "contended",
+        "queue": "observable-only",
+        "requests": 512,
+        "seed": 16180339,
+        "trace": {
+          "path": "traces/sequential-c8-s16180339.csv",
+          "sha256": "6c3b353fa7e868c5f626f69fdc93235cd5eaa8ea603ee25459eb9585cf7c3d10"
+        }
+      },
+      "repeat": 1
+    },
+    {
+      "arm": "fixed256",
+      "case": {
+        "bandwidth_mib": 128,
+        "cache_mib": 64,
+        "clients": 8,
+        "expected_checksum": "c4fa6c297ca75881",
+        "frontend": "concurrent",
+        "id": "sequential-c8-contended-logical-concurrent",
+        "identity": "logical",
+        "latency_us": 500,
+        "pattern": "sequential",
+        "profile": "contended",
+        "queue": "observable-only",
+        "requests": 512,
+        "seed": 16180339,
+        "trace": {
+          "path": "traces/sequential-c8-s16180339.csv",
+          "sha256": "6c3b353fa7e868c5f626f69fdc93235cd5eaa8ea603ee25459eb9585cf7c3d10"
+        }
+      },
+      "repeat": 1
+    },
+    {
+      "arm": "fixed1024",
+      "case": {
+        "bandwidth_mib": 128,
+        "cache_mib": 64,
+        "clients": 8,
+        "expected_checksum": "c4fa6c297ca75881",
+        "frontend": "concurrent",
+        "id": "sequential-c8-contended-logical-concurrent",
+        "identity": "logical",
+        "latency_us": 500,
+        "pattern": "sequential",
+        "profile": "contended",
+        "queue": "observable-only",
+        "requests": 512,
+        "seed": 16180339,
+        "trace": {
+          "path": "traces/sequential-c8-s16180339.csv",
+          "sha256": "6c3b353fa7e868c5f626f69fdc93235cd5eaa8ea603ee25459eb9585cf7c3d10"
+        }
+      },
+      "repeat": 1
+    },
+    {
+      "arm": "fixed64",
+      "case": {
+        "bandwidth_mib": 128,
+        "cache_mib": 64,
+        "clients": 8,
+        "expected_checksum": "c4fa6c297ca75881",
+        "frontend": "concurrent",
+        "id": "sequential-c8-contended-logical-concurrent",
+        "identity": "logical",
+        "latency_us": 500,
+        "pattern": "sequential",
+        "profile": "contended",
+        "queue": "observable-only",
+        "requests": 512,
+        "seed": 16180339,
+        "trace": {
+          "path": "traces/sequential-c8-s16180339.csv",
+          "sha256": "6c3b353fa7e868c5f626f69fdc93235cd5eaa8ea603ee25459eb9585cf7c3d10"
+        }
+      },
+      "repeat": 1
+    },
+    {
+      "arm": "fixed256",
+      "case": {
+        "bandwidth_mib": 128,
+        "cache_mib": 64,
+        "clients": 8,
+        "expected_checksum": "c4fa6c297ca75881",
+        "frontend": "concurrent",
+        "id": "sequential-c8-contended-collapsed-concurrent",
+        "identity": "collapsed",
+        "latency_us": 500,
+        "pattern": "sequential",
+        "profile": "contended",
+        "queue": "observable-only",
+        "requests": 512,
+        "seed": 16180339,
+        "trace": {
+          "path": "traces/sequential-c8-s16180339.csv",
+          "sha256": "6c3b353fa7e868c5f626f69fdc93235cd5eaa8ea603ee25459eb9585cf7c3d10"
+        }
+      },
+      "repeat": 1
+    },
+    {
+      "arm": "adaptive",
+      "case": {
+        "bandwidth_mib": 128,
+        "cache_mib": 64,
+        "clients": 8,
+        "expected_checksum": "c4fa6c297ca75881",
+        "frontend": "concurrent",
+        "id": "sequential-c8-contended-collapsed-concurrent",
+        "identity": "collapsed",
+        "latency_us": 500,
+        "pattern": "sequential",
+        "profile": "contended",
+        "queue": "observable-only",
+        "requests": 512,
+        "seed": 16180339,
+        "trace": {
+          "path": "traces/sequential-c8-s16180339.csv",
+          "sha256": "6c3b353fa7e868c5f626f69fdc93235cd5eaa8ea603ee25459eb9585cf7c3d10"
+        }
+      },
+      "repeat": 1
+    },
+    {
+      "arm": "fixed16",
+      "case": {
+        "bandwidth_mib": 128,
+        "cache_mib": 64,
+        "clients": 8,
+        "expected_checksum": "c4fa6c297ca75881",
+        "frontend": "concurrent",
+        "id": "sequential-c8-contended-collapsed-concurrent",
+        "identity": "collapsed",
+        "latency_us": 500,
+        "pattern": "sequential",
+        "profile": "contended",
+        "queue": "observable-only",
+        "requests": 512,
+        "seed": 16180339,
+        "trace": {
+          "path": "traces/sequential-c8-s16180339.csv",
+          "sha256": "6c3b353fa7e868c5f626f69fdc93235cd5eaa8ea603ee25459eb9585cf7c3d10"
+        }
+      },
+      "repeat": 1
+    },
+    {
+      "arm": "fixed64",
+      "case": {
+        "bandwidth_mib": 128,
+        "cache_mib": 64,
+        "clients": 8,
+        "expected_checksum": "c4fa6c297ca75881",
+        "frontend": "concurrent",
+        "id": "sequential-c8-contended-collapsed-concurrent",
+        "identity": "collapsed",
+        "latency_us": 500,
+        "pattern": "sequential",
+        "profile": "contended",
+        "queue": "observable-only",
+        "requests": 512,
+        "seed": 16180339,
+        "trace": {
+          "path": "traces/sequential-c8-s16180339.csv",
+          "sha256": "6c3b353fa7e868c5f626f69fdc93235cd5eaa8ea603ee25459eb9585cf7c3d10"
+        }
+      },
+      "repeat": 1
+    },
+    {
+      "arm": "grow-reset",
+      "case": {
+        "bandwidth_mib": 128,
+        "cache_mib": 64,
+        "clients": 8,
+        "expected_checksum": "c4fa6c297ca75881",
+        "frontend": "concurrent",
+        "id": "sequential-c8-contended-collapsed-concurrent",
+        "identity": "collapsed",
+        "latency_us": 500,
+        "pattern": "sequential",
+        "profile": "contended",
+        "queue": "observable-only",
+        "requests": 512,
+        "seed": 16180339,
+        "trace": {
+          "path": "traces/sequential-c8-s16180339.csv",
+          "sha256": "6c3b353fa7e868c5f626f69fdc93235cd5eaa8ea603ee25459eb9585cf7c3d10"
+        }
+      },
+      "repeat": 1
+    },
+    {
+      "arm": "fixed1024",
+      "case": {
+        "bandwidth_mib": 128,
+        "cache_mib": 64,
+        "clients": 8,
+        "expected_checksum": "c4fa6c297ca75881",
+        "frontend": "concurrent",
+        "id": "sequential-c8-contended-collapsed-concurrent",
+        "identity": "collapsed",
+        "latency_us": 500,
+        "pattern": "sequential",
+        "profile": "contended",
+        "queue": "observable-only",
+        "requests": 512,
+        "seed": 16180339,
+        "trace": {
+          "path": "traces/sequential-c8-s16180339.csv",
+          "sha256": "6c3b353fa7e868c5f626f69fdc93235cd5eaa8ea603ee25459eb9585cf7c3d10"
+        }
+      },
+      "repeat": 1
+    },
+    {
+      "arm": "fixed64",
+      "case": {
+        "bandwidth_mib": 128,
+        "cache_mib": 64,
+        "clients": 8,
+        "expected_checksum": "5696840d948c3a52",
+        "frontend": "concurrent",
+        "id": "mixed-c8-contended-collapsed-concurrent",
+        "identity": "collapsed",
+        "latency_us": 500,
+        "pattern": "mixed",
+        "profile": "contended",
+        "queue": "observable-only",
+        "requests": 256,
+        "seed": 16180339,
+        "trace": {
+          "path": "traces/mixed-c8-s16180339.csv",
+          "sha256": "ec12d65d3807bb2330786d6fdf6ee230ea9aab52a7ba9b38cefce257b6fab2ba"
+        }
+      },
+      "repeat": 1
+    },
+    {
+      "arm": "grow-reset",
+      "case": {
+        "bandwidth_mib": 128,
+        "cache_mib": 64,
+        "clients": 8,
+        "expected_checksum": "5696840d948c3a52",
+        "frontend": "concurrent",
+        "id": "mixed-c8-contended-collapsed-concurrent",
+        "identity": "collapsed",
+        "latency_us": 500,
+        "pattern": "mixed",
+        "profile": "contended",
+        "queue": "observable-only",
+        "requests": 256,
+        "seed": 16180339,
+        "trace": {
+          "path": "traces/mixed-c8-s16180339.csv",
+          "sha256": "ec12d65d3807bb2330786d6fdf6ee230ea9aab52a7ba9b38cefce257b6fab2ba"
+        }
+      },
+      "repeat": 1
+    },
+    {
+      "arm": "fixed256",
+      "case": {
+        "bandwidth_mib": 128,
+        "cache_mib": 64,
+        "clients": 8,
+        "expected_checksum": "5696840d948c3a52",
+        "frontend": "concurrent",
+        "id": "mixed-c8-contended-collapsed-concurrent",
+        "identity": "collapsed",
+        "latency_us": 500,
+        "pattern": "mixed",
+        "profile": "contended",
+        "queue": "observable-only",
+        "requests": 256,
+        "seed": 16180339,
+        "trace": {
+          "path": "traces/mixed-c8-s16180339.csv",
+          "sha256": "ec12d65d3807bb2330786d6fdf6ee230ea9aab52a7ba9b38cefce257b6fab2ba"
+        }
+      },
+      "repeat": 1
+    },
+    {
+      "arm": "fixed1024",
+      "case": {
+        "bandwidth_mib": 128,
+        "cache_mib": 64,
+        "clients": 8,
+        "expected_checksum": "5696840d948c3a52",
+        "frontend": "concurrent",
+        "id": "mixed-c8-contended-collapsed-concurrent",
+        "identity": "collapsed",
+        "latency_us": 500,
+        "pattern": "mixed",
+        "profile": "contended",
+        "queue": "observable-only",
+        "requests": 256,
+        "seed": 16180339,
+        "trace": {
+          "path": "traces/mixed-c8-s16180339.csv",
+          "sha256": "ec12d65d3807bb2330786d6fdf6ee230ea9aab52a7ba9b38cefce257b6fab2ba"
+        }
+      },
+      "repeat": 1
+    },
+    {
+      "arm": "adaptive",
+      "case": {
+        "bandwidth_mib": 128,
+        "cache_mib": 64,
+        "clients": 8,
+        "expected_checksum": "5696840d948c3a52",
+        "frontend": "concurrent",
+        "id": "mixed-c8-contended-collapsed-concurrent",
+        "identity": "collapsed",
+        "latency_us": 500,
+        "pattern": "mixed",
+        "profile": "contended",
+        "queue": "observable-only",
+        "requests": 256,
+        "seed": 16180339,
+        "trace": {
+          "path": "traces/mixed-c8-s16180339.csv",
+          "sha256": "ec12d65d3807bb2330786d6fdf6ee230ea9aab52a7ba9b38cefce257b6fab2ba"
+        }
+      },
+      "repeat": 1
+    },
+    {
+      "arm": "fixed16",
+      "case": {
+        "bandwidth_mib": 128,
+        "cache_mib": 64,
+        "clients": 8,
+        "expected_checksum": "5696840d948c3a52",
+        "frontend": "concurrent",
+        "id": "mixed-c8-contended-collapsed-concurrent",
+        "identity": "collapsed",
+        "latency_us": 500,
+        "pattern": "mixed",
+        "profile": "contended",
+        "queue": "observable-only",
+        "requests": 256,
+        "seed": 16180339,
+        "trace": {
+          "path": "traces/mixed-c8-s16180339.csv",
+          "sha256": "ec12d65d3807bb2330786d6fdf6ee230ea9aab52a7ba9b38cefce257b6fab2ba"
+        }
+      },
+      "repeat": 1
+    },
+    {
+      "arm": "grow-reset",
+      "case": {
+        "bandwidth_mib": 128,
+        "cache_mib": 64,
+        "clients": 8,
+        "expected_checksum": "5696840d948c3a52",
+        "frontend": "concurrent",
+        "id": "mixed-c8-contended-logical-concurrent",
+        "identity": "logical",
+        "latency_us": 500,
+        "pattern": "mixed",
+        "profile": "contended",
+        "queue": "observable-only",
+        "requests": 256,
+        "seed": 16180339,
+        "trace": {
+          "path": "traces/mixed-c8-s16180339.csv",
+          "sha256": "ec12d65d3807bb2330786d6fdf6ee230ea9aab52a7ba9b38cefce257b6fab2ba"
+        }
+      },
+      "repeat": 1
+    },
+    {
+      "arm": "adaptive",
+      "case": {
+        "bandwidth_mib": 128,
+        "cache_mib": 64,
+        "clients": 8,
+        "expected_checksum": "5696840d948c3a52",
+        "frontend": "concurrent",
+        "id": "mixed-c8-contended-logical-concurrent",
+        "identity": "logical",
+        "latency_us": 500,
+        "pattern": "mixed",
+        "profile": "contended",
+        "queue": "observable-only",
+        "requests": 256,
+        "seed": 16180339,
+        "trace": {
+          "path": "traces/mixed-c8-s16180339.csv",
+          "sha256": "ec12d65d3807bb2330786d6fdf6ee230ea9aab52a7ba9b38cefce257b6fab2ba"
+        }
+      },
+      "repeat": 1
+    },
+    {
+      "arm": "fixed256",
+      "case": {
+        "bandwidth_mib": 128,
+        "cache_mib": 64,
+        "clients": 8,
+        "expected_checksum": "5696840d948c3a52",
+        "frontend": "concurrent",
+        "id": "mixed-c8-contended-logical-concurrent",
+        "identity": "logical",
+        "latency_us": 500,
+        "pattern": "mixed",
+        "profile": "contended",
+        "queue": "observable-only",
+        "requests": 256,
+        "seed": 16180339,
+        "trace": {
+          "path": "traces/mixed-c8-s16180339.csv",
+          "sha256": "ec12d65d3807bb2330786d6fdf6ee230ea9aab52a7ba9b38cefce257b6fab2ba"
+        }
+      },
+      "repeat": 1
+    },
+    {
+      "arm": "fixed64",
+      "case": {
+        "bandwidth_mib": 128,
+        "cache_mib": 64,
+        "clients": 8,
+        "expected_checksum": "5696840d948c3a52",
+        "frontend": "concurrent",
+        "id": "mixed-c8-contended-logical-concurrent",
+        "identity": "logical",
+        "latency_us": 500,
+        "pattern": "mixed",
+        "profile": "contended",
+        "queue": "observable-only",
+        "requests": 256,
+        "seed": 16180339,
+        "trace": {
+          "path": "traces/mixed-c8-s16180339.csv",
+          "sha256": "ec12d65d3807bb2330786d6fdf6ee230ea9aab52a7ba9b38cefce257b6fab2ba"
+        }
+      },
+      "repeat": 1
+    },
+    {
+      "arm": "fixed16",
+      "case": {
+        "bandwidth_mib": 128,
+        "cache_mib": 64,
+        "clients": 8,
+        "expected_checksum": "5696840d948c3a52",
+        "frontend": "concurrent",
+        "id": "mixed-c8-contended-logical-concurrent",
+        "identity": "logical",
+        "latency_us": 500,
+        "pattern": "mixed",
+        "profile": "contended",
+        "queue": "observable-only",
+        "requests": 256,
+        "seed": 16180339,
+        "trace": {
+          "path": "traces/mixed-c8-s16180339.csv",
+          "sha256": "ec12d65d3807bb2330786d6fdf6ee230ea9aab52a7ba9b38cefce257b6fab2ba"
+        }
+      },
+      "repeat": 1
+    },
+    {
+      "arm": "fixed1024",
+      "case": {
+        "bandwidth_mib": 128,
+        "cache_mib": 64,
+        "clients": 8,
+        "expected_checksum": "5696840d948c3a52",
+        "frontend": "concurrent",
+        "id": "mixed-c8-contended-logical-concurrent",
+        "identity": "logical",
+        "latency_us": 500,
+        "pattern": "mixed",
+        "profile": "contended",
+        "queue": "observable-only",
+        "requests": 256,
+        "seed": 16180339,
+        "trace": {
+          "path": "traces/mixed-c8-s16180339.csv",
+          "sha256": "ec12d65d3807bb2330786d6fdf6ee230ea9aab52a7ba9b38cefce257b6fab2ba"
+        }
+      },
+      "repeat": 1
+    },
+    {
+      "arm": "fixed64",
+      "case": {
+        "bandwidth_mib": 128,
+        "cache_mib": 64,
+        "clients": 8,
+        "expected_checksum": "5696840d948c3a52",
+        "frontend": "serialized",
+        "id": "mixed-c8-contended-logical-serialized",
+        "identity": "logical",
+        "latency_us": 500,
+        "pattern": "mixed",
+        "profile": "contended",
+        "queue": "observable-only",
+        "requests": 256,
+        "seed": 16180339,
+        "trace": {
+          "path": "traces/mixed-c8-s16180339.csv",
+          "sha256": "ec12d65d3807bb2330786d6fdf6ee230ea9aab52a7ba9b38cefce257b6fab2ba"
+        }
+      },
+      "repeat": 1
+    },
+    {
+      "arm": "adaptive",
+      "case": {
+        "bandwidth_mib": 128,
+        "cache_mib": 64,
+        "clients": 8,
+        "expected_checksum": "5696840d948c3a52",
+        "frontend": "serialized",
+        "id": "mixed-c8-contended-logical-serialized",
+        "identity": "logical",
+        "latency_us": 500,
+        "pattern": "mixed",
+        "profile": "contended",
+        "queue": "observable-only",
+        "requests": 256,
+        "seed": 16180339,
+        "trace": {
+          "path": "traces/mixed-c8-s16180339.csv",
+          "sha256": "ec12d65d3807bb2330786d6fdf6ee230ea9aab52a7ba9b38cefce257b6fab2ba"
+        }
+      },
+      "repeat": 1
+    },
+    {
+      "arm": "grow-reset",
+      "case": {
+        "bandwidth_mib": 128,
+        "cache_mib": 64,
+        "clients": 8,
+        "expected_checksum": "5696840d948c3a52",
+        "frontend": "serialized",
+        "id": "mixed-c8-contended-logical-serialized",
+        "identity": "logical",
+        "latency_us": 500,
+        "pattern": "mixed",
+        "profile": "contended",
+        "queue": "observable-only",
+        "requests": 256,
+        "seed": 16180339,
+        "trace": {
+          "path": "traces/mixed-c8-s16180339.csv",
+          "sha256": "ec12d65d3807bb2330786d6fdf6ee230ea9aab52a7ba9b38cefce257b6fab2ba"
+        }
+      },
+      "repeat": 1
+    },
+    {
+      "arm": "fixed1024",
+      "case": {
+        "bandwidth_mib": 128,
+        "cache_mib": 64,
+        "clients": 8,
+        "expected_checksum": "5696840d948c3a52",
+        "frontend": "serialized",
+        "id": "mixed-c8-contended-logical-serialized",
+        "identity": "logical",
+        "latency_us": 500,
+        "pattern": "mixed",
+        "profile": "contended",
+        "queue": "observable-only",
+        "requests": 256,
+        "seed": 16180339,
+        "trace": {
+          "path": "traces/mixed-c8-s16180339.csv",
+          "sha256": "ec12d65d3807bb2330786d6fdf6ee230ea9aab52a7ba9b38cefce257b6fab2ba"
+        }
+      },
+      "repeat": 1
+    },
+    {
+      "arm": "fixed16",
+      "case": {
+        "bandwidth_mib": 128,
+        "cache_mib": 64,
+        "clients": 8,
+        "expected_checksum": "5696840d948c3a52",
+        "frontend": "serialized",
+        "id": "mixed-c8-contended-logical-serialized",
+        "identity": "logical",
+        "latency_us": 500,
+        "pattern": "mixed",
+        "profile": "contended",
+        "queue": "observable-only",
+        "requests": 256,
+        "seed": 16180339,
+        "trace": {
+          "path": "traces/mixed-c8-s16180339.csv",
+          "sha256": "ec12d65d3807bb2330786d6fdf6ee230ea9aab52a7ba9b38cefce257b6fab2ba"
+        }
+      },
+      "repeat": 1
+    },
+    {
+      "arm": "fixed256",
+      "case": {
+        "bandwidth_mib": 128,
+        "cache_mib": 64,
+        "clients": 8,
+        "expected_checksum": "5696840d948c3a52",
+        "frontend": "serialized",
+        "id": "mixed-c8-contended-logical-serialized",
+        "identity": "logical",
+        "latency_us": 500,
+        "pattern": "mixed",
+        "profile": "contended",
+        "queue": "observable-only",
+        "requests": 256,
+        "seed": 16180339,
+        "trace": {
+          "path": "traces/mixed-c8-s16180339.csv",
+          "sha256": "ec12d65d3807bb2330786d6fdf6ee230ea9aab52a7ba9b38cefce257b6fab2ba"
+        }
+      },
+      "repeat": 1
+    },
+    {
+      "arm": "fixed64",
+      "case": {
+        "bandwidth_mib": 128,
+        "cache_mib": 64,
+        "clients": 8,
+        "expected_checksum": "c4fa6c297ca75881",
+        "frontend": "serialized",
+        "id": "sequential-c8-contended-collapsed-serialized",
+        "identity": "collapsed",
+        "latency_us": 500,
+        "pattern": "sequential",
+        "profile": "contended",
+        "queue": "observable-only",
+        "requests": 512,
+        "seed": 16180339,
+        "trace": {
+          "path": "traces/sequential-c8-s16180339.csv",
+          "sha256": "6c3b353fa7e868c5f626f69fdc93235cd5eaa8ea603ee25459eb9585cf7c3d10"
+        }
+      },
+      "repeat": 1
+    },
+    {
+      "arm": "adaptive",
+      "case": {
+        "bandwidth_mib": 128,
+        "cache_mib": 64,
+        "clients": 8,
+        "expected_checksum": "c4fa6c297ca75881",
+        "frontend": "serialized",
+        "id": "sequential-c8-contended-collapsed-serialized",
+        "identity": "collapsed",
+        "latency_us": 500,
+        "pattern": "sequential",
+        "profile": "contended",
+        "queue": "observable-only",
+        "requests": 512,
+        "seed": 16180339,
+        "trace": {
+          "path": "traces/sequential-c8-s16180339.csv",
+          "sha256": "6c3b353fa7e868c5f626f69fdc93235cd5eaa8ea603ee25459eb9585cf7c3d10"
+        }
+      },
+      "repeat": 1
+    },
+    {
+      "arm": "grow-reset",
+      "case": {
+        "bandwidth_mib": 128,
+        "cache_mib": 64,
+        "clients": 8,
+        "expected_checksum": "c4fa6c297ca75881",
+        "frontend": "serialized",
+        "id": "sequential-c8-contended-collapsed-serialized",
+        "identity": "collapsed",
+        "latency_us": 500,
+        "pattern": "sequential",
+        "profile": "contended",
+        "queue": "observable-only",
+        "requests": 512,
+        "seed": 16180339,
+        "trace": {
+          "path": "traces/sequential-c8-s16180339.csv",
+          "sha256": "6c3b353fa7e868c5f626f69fdc93235cd5eaa8ea603ee25459eb9585cf7c3d10"
+        }
+      },
+      "repeat": 1
+    },
+    {
+      "arm": "fixed16",
+      "case": {
+        "bandwidth_mib": 128,
+        "cache_mib": 64,
+        "clients": 8,
+        "expected_checksum": "c4fa6c297ca75881",
+        "frontend": "serialized",
+        "id": "sequential-c8-contended-collapsed-serialized",
+        "identity": "collapsed",
+        "latency_us": 500,
+        "pattern": "sequential",
+        "profile": "contended",
+        "queue": "observable-only",
+        "requests": 512,
+        "seed": 16180339,
+        "trace": {
+          "path": "traces/sequential-c8-s16180339.csv",
+          "sha256": "6c3b353fa7e868c5f626f69fdc93235cd5eaa8ea603ee25459eb9585cf7c3d10"
+        }
+      },
+      "repeat": 1
+    },
+    {
+      "arm": "fixed256",
+      "case": {
+        "bandwidth_mib": 128,
+        "cache_mib": 64,
+        "clients": 8,
+        "expected_checksum": "c4fa6c297ca75881",
+        "frontend": "serialized",
+        "id": "sequential-c8-contended-collapsed-serialized",
+        "identity": "collapsed",
+        "latency_us": 500,
+        "pattern": "sequential",
+        "profile": "contended",
+        "queue": "observable-only",
+        "requests": 512,
+        "seed": 16180339,
+        "trace": {
+          "path": "traces/sequential-c8-s16180339.csv",
+          "sha256": "6c3b353fa7e868c5f626f69fdc93235cd5eaa8ea603ee25459eb9585cf7c3d10"
+        }
+      },
+      "repeat": 1
+    },
+    {
+      "arm": "fixed1024",
+      "case": {
+        "bandwidth_mib": 128,
+        "cache_mib": 64,
+        "clients": 8,
+        "expected_checksum": "c4fa6c297ca75881",
+        "frontend": "serialized",
+        "id": "sequential-c8-contended-collapsed-serialized",
+        "identity": "collapsed",
+        "latency_us": 500,
+        "pattern": "sequential",
+        "profile": "contended",
+        "queue": "observable-only",
+        "requests": 512,
+        "seed": 16180339,
+        "trace": {
+          "path": "traces/sequential-c8-s16180339.csv",
+          "sha256": "6c3b353fa7e868c5f626f69fdc93235cd5eaa8ea603ee25459eb9585cf7c3d10"
+        }
+      },
+      "repeat": 1
+    },
+    {
+      "arm": "fixed1024",
+      "case": {
+        "bandwidth_mib": 128,
+        "cache_mib": 64,
+        "clients": 8,
+        "expected_checksum": "c4fa6c297ca75881",
+        "frontend": "serialized",
+        "id": "sequential-c8-contended-logical-serialized",
+        "identity": "logical",
+        "latency_us": 500,
+        "pattern": "sequential",
+        "profile": "contended",
+        "queue": "observable-only",
+        "requests": 512,
+        "seed": 16180339,
+        "trace": {
+          "path": "traces/sequential-c8-s16180339.csv",
+          "sha256": "6c3b353fa7e868c5f626f69fdc93235cd5eaa8ea603ee25459eb9585cf7c3d10"
+        }
+      },
+      "repeat": 2
+    },
+    {
+      "arm": "grow-reset",
+      "case": {
+        "bandwidth_mib": 128,
+        "cache_mib": 64,
+        "clients": 8,
+        "expected_checksum": "c4fa6c297ca75881",
+        "frontend": "serialized",
+        "id": "sequential-c8-contended-logical-serialized",
+        "identity": "logical",
+        "latency_us": 500,
+        "pattern": "sequential",
+        "profile": "contended",
+        "queue": "observable-only",
+        "requests": 512,
+        "seed": 16180339,
+        "trace": {
+          "path": "traces/sequential-c8-s16180339.csv",
+          "sha256": "6c3b353fa7e868c5f626f69fdc93235cd5eaa8ea603ee25459eb9585cf7c3d10"
+        }
+      },
+      "repeat": 2
+    },
+    {
+      "arm": "fixed256",
+      "case": {
+        "bandwidth_mib": 128,
+        "cache_mib": 64,
+        "clients": 8,
+        "expected_checksum": "c4fa6c297ca75881",
+        "frontend": "serialized",
+        "id": "sequential-c8-contended-logical-serialized",
+        "identity": "logical",
+        "latency_us": 500,
+        "pattern": "sequential",
+        "profile": "contended",
+        "queue": "observable-only",
+        "requests": 512,
+        "seed": 16180339,
+        "trace": {
+          "path": "traces/sequential-c8-s16180339.csv",
+          "sha256": "6c3b353fa7e868c5f626f69fdc93235cd5eaa8ea603ee25459eb9585cf7c3d10"
+        }
+      },
+      "repeat": 2
+    },
+    {
+      "arm": "fixed16",
+      "case": {
+        "bandwidth_mib": 128,
+        "cache_mib": 64,
+        "clients": 8,
+        "expected_checksum": "c4fa6c297ca75881",
+        "frontend": "serialized",
+        "id": "sequential-c8-contended-logical-serialized",
+        "identity": "logical",
+        "latency_us": 500,
+        "pattern": "sequential",
+        "profile": "contended",
+        "queue": "observable-only",
+        "requests": 512,
+        "seed": 16180339,
+        "trace": {
+          "path": "traces/sequential-c8-s16180339.csv",
+          "sha256": "6c3b353fa7e868c5f626f69fdc93235cd5eaa8ea603ee25459eb9585cf7c3d10"
+        }
+      },
+      "repeat": 2
+    },
+    {
+      "arm": "fixed64",
+      "case": {
+        "bandwidth_mib": 128,
+        "cache_mib": 64,
+        "clients": 8,
+        "expected_checksum": "c4fa6c297ca75881",
+        "frontend": "serialized",
+        "id": "sequential-c8-contended-logical-serialized",
+        "identity": "logical",
+        "latency_us": 500,
+        "pattern": "sequential",
+        "profile": "contended",
+        "queue": "observable-only",
+        "requests": 512,
+        "seed": 16180339,
+        "trace": {
+          "path": "traces/sequential-c8-s16180339.csv",
+          "sha256": "6c3b353fa7e868c5f626f69fdc93235cd5eaa8ea603ee25459eb9585cf7c3d10"
+        }
+      },
+      "repeat": 2
+    },
+    {
+      "arm": "adaptive",
+      "case": {
+        "bandwidth_mib": 128,
+        "cache_mib": 64,
+        "clients": 8,
+        "expected_checksum": "c4fa6c297ca75881",
+        "frontend": "serialized",
+        "id": "sequential-c8-contended-logical-serialized",
+        "identity": "logical",
+        "latency_us": 500,
+        "pattern": "sequential",
+        "profile": "contended",
+        "queue": "observable-only",
+        "requests": 512,
+        "seed": 16180339,
+        "trace": {
+          "path": "traces/sequential-c8-s16180339.csv",
+          "sha256": "6c3b353fa7e868c5f626f69fdc93235cd5eaa8ea603ee25459eb9585cf7c3d10"
+        }
+      },
+      "repeat": 2
+    },
+    {
+      "arm": "fixed1024",
+      "case": {
+        "bandwidth_mib": 128,
+        "cache_mib": 64,
+        "clients": 8,
+        "expected_checksum": "5696840d948c3a52",
+        "frontend": "concurrent",
+        "id": "mixed-c8-contended-logical-concurrent",
+        "identity": "logical",
+        "latency_us": 500,
+        "pattern": "mixed",
+        "profile": "contended",
+        "queue": "observable-only",
+        "requests": 256,
+        "seed": 16180339,
+        "trace": {
+          "path": "traces/mixed-c8-s16180339.csv",
+          "sha256": "ec12d65d3807bb2330786d6fdf6ee230ea9aab52a7ba9b38cefce257b6fab2ba"
+        }
+      },
+      "repeat": 2
+    },
+    {
+      "arm": "fixed256",
+      "case": {
+        "bandwidth_mib": 128,
+        "cache_mib": 64,
+        "clients": 8,
+        "expected_checksum": "5696840d948c3a52",
+        "frontend": "concurrent",
+        "id": "mixed-c8-contended-logical-concurrent",
+        "identity": "logical",
+        "latency_us": 500,
+        "pattern": "mixed",
+        "profile": "contended",
+        "queue": "observable-only",
+        "requests": 256,
+        "seed": 16180339,
+        "trace": {
+          "path": "traces/mixed-c8-s16180339.csv",
+          "sha256": "ec12d65d3807bb2330786d6fdf6ee230ea9aab52a7ba9b38cefce257b6fab2ba"
+        }
+      },
+      "repeat": 2
+    },
+    {
+      "arm": "fixed64",
+      "case": {
+        "bandwidth_mib": 128,
+        "cache_mib": 64,
+        "clients": 8,
+        "expected_checksum": "5696840d948c3a52",
+        "frontend": "concurrent",
+        "id": "mixed-c8-contended-logical-concurrent",
+        "identity": "logical",
+        "latency_us": 500,
+        "pattern": "mixed",
+        "profile": "contended",
+        "queue": "observable-only",
+        "requests": 256,
+        "seed": 16180339,
+        "trace": {
+          "path": "traces/mixed-c8-s16180339.csv",
+          "sha256": "ec12d65d3807bb2330786d6fdf6ee230ea9aab52a7ba9b38cefce257b6fab2ba"
+        }
+      },
+      "repeat": 2
+    },
+    {
+      "arm": "grow-reset",
+      "case": {
+        "bandwidth_mib": 128,
+        "cache_mib": 64,
+        "clients": 8,
+        "expected_checksum": "5696840d948c3a52",
+        "frontend": "concurrent",
+        "id": "mixed-c8-contended-logical-concurrent",
+        "identity": "logical",
+        "latency_us": 500,
+        "pattern": "mixed",
+        "profile": "contended",
+        "queue": "observable-only",
+        "requests": 256,
+        "seed": 16180339,
+        "trace": {
+          "path": "traces/mixed-c8-s16180339.csv",
+          "sha256": "ec12d65d3807bb2330786d6fdf6ee230ea9aab52a7ba9b38cefce257b6fab2ba"
+        }
+      },
+      "repeat": 2
+    },
+    {
+      "arm": "fixed16",
+      "case": {
+        "bandwidth_mib": 128,
+        "cache_mib": 64,
+        "clients": 8,
+        "expected_checksum": "5696840d948c3a52",
+        "frontend": "concurrent",
+        "id": "mixed-c8-contended-logical-concurrent",
+        "identity": "logical",
+        "latency_us": 500,
+        "pattern": "mixed",
+        "profile": "contended",
+        "queue": "observable-only",
+        "requests": 256,
+        "seed": 16180339,
+        "trace": {
+          "path": "traces/mixed-c8-s16180339.csv",
+          "sha256": "ec12d65d3807bb2330786d6fdf6ee230ea9aab52a7ba9b38cefce257b6fab2ba"
+        }
+      },
+      "repeat": 2
+    },
+    {
+      "arm": "adaptive",
+      "case": {
+        "bandwidth_mib": 128,
+        "cache_mib": 64,
+        "clients": 8,
+        "expected_checksum": "5696840d948c3a52",
+        "frontend": "concurrent",
+        "id": "mixed-c8-contended-logical-concurrent",
+        "identity": "logical",
+        "latency_us": 500,
+        "pattern": "mixed",
+        "profile": "contended",
+        "queue": "observable-only",
+        "requests": 256,
+        "seed": 16180339,
+        "trace": {
+          "path": "traces/mixed-c8-s16180339.csv",
+          "sha256": "ec12d65d3807bb2330786d6fdf6ee230ea9aab52a7ba9b38cefce257b6fab2ba"
+        }
+      },
+      "repeat": 2
+    },
+    {
+      "arm": "fixed1024",
+      "case": {
+        "bandwidth_mib": 128,
+        "cache_mib": 64,
+        "clients": 8,
+        "expected_checksum": "5696840d948c3a52",
+        "frontend": "serialized",
+        "id": "mixed-c8-contended-logical-serialized",
+        "identity": "logical",
+        "latency_us": 500,
+        "pattern": "mixed",
+        "profile": "contended",
+        "queue": "observable-only",
+        "requests": 256,
+        "seed": 16180339,
+        "trace": {
+          "path": "traces/mixed-c8-s16180339.csv",
+          "sha256": "ec12d65d3807bb2330786d6fdf6ee230ea9aab52a7ba9b38cefce257b6fab2ba"
+        }
+      },
+      "repeat": 2
+    },
+    {
+      "arm": "fixed16",
+      "case": {
+        "bandwidth_mib": 128,
+        "cache_mib": 64,
+        "clients": 8,
+        "expected_checksum": "5696840d948c3a52",
+        "frontend": "serialized",
+        "id": "mixed-c8-contended-logical-serialized",
+        "identity": "logical",
+        "latency_us": 500,
+        "pattern": "mixed",
+        "profile": "contended",
+        "queue": "observable-only",
+        "requests": 256,
+        "seed": 16180339,
+        "trace": {
+          "path": "traces/mixed-c8-s16180339.csv",
+          "sha256": "ec12d65d3807bb2330786d6fdf6ee230ea9aab52a7ba9b38cefce257b6fab2ba"
+        }
+      },
+      "repeat": 2
+    },
+    {
+      "arm": "fixed64",
+      "case": {
+        "bandwidth_mib": 128,
+        "cache_mib": 64,
+        "clients": 8,
+        "expected_checksum": "5696840d948c3a52",
+        "frontend": "serialized",
+        "id": "mixed-c8-contended-logical-serialized",
+        "identity": "logical",
+        "latency_us": 500,
+        "pattern": "mixed",
+        "profile": "contended",
+        "queue": "observable-only",
+        "requests": 256,
+        "seed": 16180339,
+        "trace": {
+          "path": "traces/mixed-c8-s16180339.csv",
+          "sha256": "ec12d65d3807bb2330786d6fdf6ee230ea9aab52a7ba9b38cefce257b6fab2ba"
+        }
+      },
+      "repeat": 2
+    },
+    {
+      "arm": "grow-reset",
+      "case": {
+        "bandwidth_mib": 128,
+        "cache_mib": 64,
+        "clients": 8,
+        "expected_checksum": "5696840d948c3a52",
+        "frontend": "serialized",
+        "id": "mixed-c8-contended-logical-serialized",
+        "identity": "logical",
+        "latency_us": 500,
+        "pattern": "mixed",
+        "profile": "contended",
+        "queue": "observable-only",
+        "requests": 256,
+        "seed": 16180339,
+        "trace": {
+          "path": "traces/mixed-c8-s16180339.csv",
+          "sha256": "ec12d65d3807bb2330786d6fdf6ee230ea9aab52a7ba9b38cefce257b6fab2ba"
+        }
+      },
+      "repeat": 2
+    },
+    {
+      "arm": "adaptive",
+      "case": {
+        "bandwidth_mib": 128,
+        "cache_mib": 64,
+        "clients": 8,
+        "expected_checksum": "5696840d948c3a52",
+        "frontend": "serialized",
+        "id": "mixed-c8-contended-logical-serialized",
+        "identity": "logical",
+        "latency_us": 500,
+        "pattern": "mixed",
+        "profile": "contended",
+        "queue": "observable-only",
+        "requests": 256,
+        "seed": 16180339,
+        "trace": {
+          "path": "traces/mixed-c8-s16180339.csv",
+          "sha256": "ec12d65d3807bb2330786d6fdf6ee230ea9aab52a7ba9b38cefce257b6fab2ba"
+        }
+      },
+      "repeat": 2
+    },
+    {
+      "arm": "fixed256",
+      "case": {
+        "bandwidth_mib": 128,
+        "cache_mib": 64,
+        "clients": 8,
+        "expected_checksum": "5696840d948c3a52",
+        "frontend": "serialized",
+        "id": "mixed-c8-contended-logical-serialized",
+        "identity": "logical",
+        "latency_us": 500,
+        "pattern": "mixed",
+        "profile": "contended",
+        "queue": "observable-only",
+        "requests": 256,
+        "seed": 16180339,
+        "trace": {
+          "path": "traces/mixed-c8-s16180339.csv",
+          "sha256": "ec12d65d3807bb2330786d6fdf6ee230ea9aab52a7ba9b38cefce257b6fab2ba"
+        }
+      },
+      "repeat": 2
+    },
+    {
+      "arm": "fixed16",
+      "case": {
+        "bandwidth_mib": 128,
+        "cache_mib": 64,
+        "clients": 8,
+        "expected_checksum": "c4fa6c297ca75881",
+        "frontend": "concurrent",
+        "id": "sequential-c8-contended-collapsed-concurrent",
+        "identity": "collapsed",
+        "latency_us": 500,
+        "pattern": "sequential",
+        "profile": "contended",
+        "queue": "observable-only",
+        "requests": 512,
+        "seed": 16180339,
+        "trace": {
+          "path": "traces/sequential-c8-s16180339.csv",
+          "sha256": "6c3b353fa7e868c5f626f69fdc93235cd5eaa8ea603ee25459eb9585cf7c3d10"
+        }
+      },
+      "repeat": 2
+    },
+    {
+      "arm": "fixed256",
+      "case": {
+        "bandwidth_mib": 128,
+        "cache_mib": 64,
+        "clients": 8,
+        "expected_checksum": "c4fa6c297ca75881",
+        "frontend": "concurrent",
+        "id": "sequential-c8-contended-collapsed-concurrent",
+        "identity": "collapsed",
+        "latency_us": 500,
+        "pattern": "sequential",
+        "profile": "contended",
+        "queue": "observable-only",
+        "requests": 512,
+        "seed": 16180339,
+        "trace": {
+          "path": "traces/sequential-c8-s16180339.csv",
+          "sha256": "6c3b353fa7e868c5f626f69fdc93235cd5eaa8ea603ee25459eb9585cf7c3d10"
+        }
+      },
+      "repeat": 2
+    },
+    {
+      "arm": "fixed1024",
+      "case": {
+        "bandwidth_mib": 128,
+        "cache_mib": 64,
+        "clients": 8,
+        "expected_checksum": "c4fa6c297ca75881",
+        "frontend": "concurrent",
+        "id": "sequential-c8-contended-collapsed-concurrent",
+        "identity": "collapsed",
+        "latency_us": 500,
+        "pattern": "sequential",
+        "profile": "contended",
+        "queue": "observable-only",
+        "requests": 512,
+        "seed": 16180339,
+        "trace": {
+          "path": "traces/sequential-c8-s16180339.csv",
+          "sha256": "6c3b353fa7e868c5f626f69fdc93235cd5eaa8ea603ee25459eb9585cf7c3d10"
+        }
+      },
+      "repeat": 2
+    },
+    {
+      "arm": "fixed64",
+      "case": {
+        "bandwidth_mib": 128,
+        "cache_mib": 64,
+        "clients": 8,
+        "expected_checksum": "c4fa6c297ca75881",
+        "frontend": "concurrent",
+        "id": "sequential-c8-contended-collapsed-concurrent",
+        "identity": "collapsed",
+        "latency_us": 500,
+        "pattern": "sequential",
+        "profile": "contended",
+        "queue": "observable-only",
+        "requests": 512,
+        "seed": 16180339,
+        "trace": {
+          "path": "traces/sequential-c8-s16180339.csv",
+          "sha256": "6c3b353fa7e868c5f626f69fdc93235cd5eaa8ea603ee25459eb9585cf7c3d10"
+        }
+      },
+      "repeat": 2
+    },
+    {
+      "arm": "adaptive",
+      "case": {
+        "bandwidth_mib": 128,
+        "cache_mib": 64,
+        "clients": 8,
+        "expected_checksum": "c4fa6c297ca75881",
+        "frontend": "concurrent",
+        "id": "sequential-c8-contended-collapsed-concurrent",
+        "identity": "collapsed",
+        "latency_us": 500,
+        "pattern": "sequential",
+        "profile": "contended",
+        "queue": "observable-only",
+        "requests": 512,
+        "seed": 16180339,
+        "trace": {
+          "path": "traces/sequential-c8-s16180339.csv",
+          "sha256": "6c3b353fa7e868c5f626f69fdc93235cd5eaa8ea603ee25459eb9585cf7c3d10"
+        }
+      },
+      "repeat": 2
+    },
+    {
+      "arm": "grow-reset",
+      "case": {
+        "bandwidth_mib": 128,
+        "cache_mib": 64,
+        "clients": 8,
+        "expected_checksum": "c4fa6c297ca75881",
+        "frontend": "concurrent",
+        "id": "sequential-c8-contended-collapsed-concurrent",
+        "identity": "collapsed",
+        "latency_us": 500,
+        "pattern": "sequential",
+        "profile": "contended",
+        "queue": "observable-only",
+        "requests": 512,
+        "seed": 16180339,
+        "trace": {
+          "path": "traces/sequential-c8-s16180339.csv",
+          "sha256": "6c3b353fa7e868c5f626f69fdc93235cd5eaa8ea603ee25459eb9585cf7c3d10"
+        }
+      },
+      "repeat": 2
+    },
+    {
+      "arm": "adaptive",
+      "case": {
+        "bandwidth_mib": 128,
+        "cache_mib": 64,
+        "clients": 8,
+        "expected_checksum": "5696840d948c3a52",
+        "frontend": "serialized",
+        "id": "mixed-c8-contended-collapsed-serialized",
+        "identity": "collapsed",
+        "latency_us": 500,
+        "pattern": "mixed",
+        "profile": "contended",
+        "queue": "observable-only",
+        "requests": 256,
+        "seed": 16180339,
+        "trace": {
+          "path": "traces/mixed-c8-s16180339.csv",
+          "sha256": "ec12d65d3807bb2330786d6fdf6ee230ea9aab52a7ba9b38cefce257b6fab2ba"
+        }
+      },
+      "repeat": 2
+    },
+    {
+      "arm": "fixed64",
+      "case": {
+        "bandwidth_mib": 128,
+        "cache_mib": 64,
+        "clients": 8,
+        "expected_checksum": "5696840d948c3a52",
+        "frontend": "serialized",
+        "id": "mixed-c8-contended-collapsed-serialized",
+        "identity": "collapsed",
+        "latency_us": 500,
+        "pattern": "mixed",
+        "profile": "contended",
+        "queue": "observable-only",
+        "requests": 256,
+        "seed": 16180339,
+        "trace": {
+          "path": "traces/mixed-c8-s16180339.csv",
+          "sha256": "ec12d65d3807bb2330786d6fdf6ee230ea9aab52a7ba9b38cefce257b6fab2ba"
+        }
+      },
+      "repeat": 2
+    },
+    {
+      "arm": "fixed256",
+      "case": {
+        "bandwidth_mib": 128,
+        "cache_mib": 64,
+        "clients": 8,
+        "expected_checksum": "5696840d948c3a52",
+        "frontend": "serialized",
+        "id": "mixed-c8-contended-collapsed-serialized",
+        "identity": "collapsed",
+        "latency_us": 500,
+        "pattern": "mixed",
+        "profile": "contended",
+        "queue": "observable-only",
+        "requests": 256,
+        "seed": 16180339,
+        "trace": {
+          "path": "traces/mixed-c8-s16180339.csv",
+          "sha256": "ec12d65d3807bb2330786d6fdf6ee230ea9aab52a7ba9b38cefce257b6fab2ba"
+        }
+      },
+      "repeat": 2
+    },
+    {
+      "arm": "fixed16",
+      "case": {
+        "bandwidth_mib": 128,
+        "cache_mib": 64,
+        "clients": 8,
+        "expected_checksum": "5696840d948c3a52",
+        "frontend": "serialized",
+        "id": "mixed-c8-contended-collapsed-serialized",
+        "identity": "collapsed",
+        "latency_us": 500,
+        "pattern": "mixed",
+        "profile": "contended",
+        "queue": "observable-only",
+        "requests": 256,
+        "seed": 16180339,
+        "trace": {
+          "path": "traces/mixed-c8-s16180339.csv",
+          "sha256": "ec12d65d3807bb2330786d6fdf6ee230ea9aab52a7ba9b38cefce257b6fab2ba"
+        }
+      },
+      "repeat": 2
+    },
+    {
+      "arm": "grow-reset",
+      "case": {
+        "bandwidth_mib": 128,
+        "cache_mib": 64,
+        "clients": 8,
+        "expected_checksum": "5696840d948c3a52",
+        "frontend": "serialized",
+        "id": "mixed-c8-contended-collapsed-serialized",
+        "identity": "collapsed",
+        "latency_us": 500,
+        "pattern": "mixed",
+        "profile": "contended",
+        "queue": "observable-only",
+        "requests": 256,
+        "seed": 16180339,
+        "trace": {
+          "path": "traces/mixed-c8-s16180339.csv",
+          "sha256": "ec12d65d3807bb2330786d6fdf6ee230ea9aab52a7ba9b38cefce257b6fab2ba"
+        }
+      },
+      "repeat": 2
+    },
+    {
+      "arm": "fixed1024",
+      "case": {
+        "bandwidth_mib": 128,
+        "cache_mib": 64,
+        "clients": 8,
+        "expected_checksum": "5696840d948c3a52",
+        "frontend": "serialized",
+        "id": "mixed-c8-contended-collapsed-serialized",
+        "identity": "collapsed",
+        "latency_us": 500,
+        "pattern": "mixed",
+        "profile": "contended",
+        "queue": "observable-only",
+        "requests": 256,
+        "seed": 16180339,
+        "trace": {
+          "path": "traces/mixed-c8-s16180339.csv",
+          "sha256": "ec12d65d3807bb2330786d6fdf6ee230ea9aab52a7ba9b38cefce257b6fab2ba"
+        }
+      },
+      "repeat": 2
+    },
+    {
+      "arm": "fixed16",
+      "case": {
+        "bandwidth_mib": 128,
+        "cache_mib": 64,
+        "clients": 8,
+        "expected_checksum": "c4fa6c297ca75881",
+        "frontend": "serialized",
+        "id": "sequential-c8-contended-collapsed-serialized",
+        "identity": "collapsed",
+        "latency_us": 500,
+        "pattern": "sequential",
+        "profile": "contended",
+        "queue": "observable-only",
+        "requests": 512,
+        "seed": 16180339,
+        "trace": {
+          "path": "traces/sequential-c8-s16180339.csv",
+          "sha256": "6c3b353fa7e868c5f626f69fdc93235cd5eaa8ea603ee25459eb9585cf7c3d10"
+        }
+      },
+      "repeat": 2
+    },
+    {
+      "arm": "fixed1024",
+      "case": {
+        "bandwidth_mib": 128,
+        "cache_mib": 64,
+        "clients": 8,
+        "expected_checksum": "c4fa6c297ca75881",
+        "frontend": "serialized",
+        "id": "sequential-c8-contended-collapsed-serialized",
+        "identity": "collapsed",
+        "latency_us": 500,
+        "pattern": "sequential",
+        "profile": "contended",
+        "queue": "observable-only",
+        "requests": 512,
+        "seed": 16180339,
+        "trace": {
+          "path": "traces/sequential-c8-s16180339.csv",
+          "sha256": "6c3b353fa7e868c5f626f69fdc93235cd5eaa8ea603ee25459eb9585cf7c3d10"
+        }
+      },
+      "repeat": 2
+    },
+    {
+      "arm": "adaptive",
+      "case": {
+        "bandwidth_mib": 128,
+        "cache_mib": 64,
+        "clients": 8,
+        "expected_checksum": "c4fa6c297ca75881",
+        "frontend": "serialized",
+        "id": "sequential-c8-contended-collapsed-serialized",
+        "identity": "collapsed",
+        "latency_us": 500,
+        "pattern": "sequential",
+        "profile": "contended",
+        "queue": "observable-only",
+        "requests": 512,
+        "seed": 16180339,
+        "trace": {
+          "path": "traces/sequential-c8-s16180339.csv",
+          "sha256": "6c3b353fa7e868c5f626f69fdc93235cd5eaa8ea603ee25459eb9585cf7c3d10"
+        }
+      },
+      "repeat": 2
+    },
+    {
+      "arm": "fixed256",
+      "case": {
+        "bandwidth_mib": 128,
+        "cache_mib": 64,
+        "clients": 8,
+        "expected_checksum": "c4fa6c297ca75881",
+        "frontend": "serialized",
+        "id": "sequential-c8-contended-collapsed-serialized",
+        "identity": "collapsed",
+        "latency_us": 500,
+        "pattern": "sequential",
+        "profile": "contended",
+        "queue": "observable-only",
+        "requests": 512,
+        "seed": 16180339,
+        "trace": {
+          "path": "traces/sequential-c8-s16180339.csv",
+          "sha256": "6c3b353fa7e868c5f626f69fdc93235cd5eaa8ea603ee25459eb9585cf7c3d10"
+        }
+      },
+      "repeat": 2
+    },
+    {
+      "arm": "fixed64",
+      "case": {
+        "bandwidth_mib": 128,
+        "cache_mib": 64,
+        "clients": 8,
+        "expected_checksum": "c4fa6c297ca75881",
+        "frontend": "serialized",
+        "id": "sequential-c8-contended-collapsed-serialized",
+        "identity": "collapsed",
+        "latency_us": 500,
+        "pattern": "sequential",
+        "profile": "contended",
+        "queue": "observable-only",
+        "requests": 512,
+        "seed": 16180339,
+        "trace": {
+          "path": "traces/sequential-c8-s16180339.csv",
+          "sha256": "6c3b353fa7e868c5f626f69fdc93235cd5eaa8ea603ee25459eb9585cf7c3d10"
+        }
+      },
+      "repeat": 2
+    },
+    {
+      "arm": "grow-reset",
+      "case": {
+        "bandwidth_mib": 128,
+        "cache_mib": 64,
+        "clients": 8,
+        "expected_checksum": "c4fa6c297ca75881",
+        "frontend": "serialized",
+        "id": "sequential-c8-contended-collapsed-serialized",
+        "identity": "collapsed",
+        "latency_us": 500,
+        "pattern": "sequential",
+        "profile": "contended",
+        "queue": "observable-only",
+        "requests": 512,
+        "seed": 16180339,
+        "trace": {
+          "path": "traces/sequential-c8-s16180339.csv",
+          "sha256": "6c3b353fa7e868c5f626f69fdc93235cd5eaa8ea603ee25459eb9585cf7c3d10"
+        }
+      },
+      "repeat": 2
+    },
+    {
+      "arm": "adaptive",
+      "case": {
+        "bandwidth_mib": 128,
+        "cache_mib": 64,
+        "clients": 8,
+        "expected_checksum": "5696840d948c3a52",
+        "frontend": "concurrent",
+        "id": "mixed-c8-contended-collapsed-concurrent",
+        "identity": "collapsed",
+        "latency_us": 500,
+        "pattern": "mixed",
+        "profile": "contended",
+        "queue": "observable-only",
+        "requests": 256,
+        "seed": 16180339,
+        "trace": {
+          "path": "traces/mixed-c8-s16180339.csv",
+          "sha256": "ec12d65d3807bb2330786d6fdf6ee230ea9aab52a7ba9b38cefce257b6fab2ba"
+        }
+      },
+      "repeat": 2
+    },
+    {
+      "arm": "fixed256",
+      "case": {
+        "bandwidth_mib": 128,
+        "cache_mib": 64,
+        "clients": 8,
+        "expected_checksum": "5696840d948c3a52",
+        "frontend": "concurrent",
+        "id": "mixed-c8-contended-collapsed-concurrent",
+        "identity": "collapsed",
+        "latency_us": 500,
+        "pattern": "mixed",
+        "profile": "contended",
+        "queue": "observable-only",
+        "requests": 256,
+        "seed": 16180339,
+        "trace": {
+          "path": "traces/mixed-c8-s16180339.csv",
+          "sha256": "ec12d65d3807bb2330786d6fdf6ee230ea9aab52a7ba9b38cefce257b6fab2ba"
+        }
+      },
+      "repeat": 2
+    },
+    {
+      "arm": "fixed1024",
+      "case": {
+        "bandwidth_mib": 128,
+        "cache_mib": 64,
+        "clients": 8,
+        "expected_checksum": "5696840d948c3a52",
+        "frontend": "concurrent",
+        "id": "mixed-c8-contended-collapsed-concurrent",
+        "identity": "collapsed",
+        "latency_us": 500,
+        "pattern": "mixed",
+        "profile": "contended",
+        "queue": "observable-only",
+        "requests": 256,
+        "seed": 16180339,
+        "trace": {
+          "path": "traces/mixed-c8-s16180339.csv",
+          "sha256": "ec12d65d3807bb2330786d6fdf6ee230ea9aab52a7ba9b38cefce257b6fab2ba"
+        }
+      },
+      "repeat": 2
+    },
+    {
+      "arm": "fixed64",
+      "case": {
+        "bandwidth_mib": 128,
+        "cache_mib": 64,
+        "clients": 8,
+        "expected_checksum": "5696840d948c3a52",
+        "frontend": "concurrent",
+        "id": "mixed-c8-contended-collapsed-concurrent",
+        "identity": "collapsed",
+        "latency_us": 500,
+        "pattern": "mixed",
+        "profile": "contended",
+        "queue": "observable-only",
+        "requests": 256,
+        "seed": 16180339,
+        "trace": {
+          "path": "traces/mixed-c8-s16180339.csv",
+          "sha256": "ec12d65d3807bb2330786d6fdf6ee230ea9aab52a7ba9b38cefce257b6fab2ba"
+        }
+      },
+      "repeat": 2
+    },
+    {
+      "arm": "grow-reset",
+      "case": {
+        "bandwidth_mib": 128,
+        "cache_mib": 64,
+        "clients": 8,
+        "expected_checksum": "5696840d948c3a52",
+        "frontend": "concurrent",
+        "id": "mixed-c8-contended-collapsed-concurrent",
+        "identity": "collapsed",
+        "latency_us": 500,
+        "pattern": "mixed",
+        "profile": "contended",
+        "queue": "observable-only",
+        "requests": 256,
+        "seed": 16180339,
+        "trace": {
+          "path": "traces/mixed-c8-s16180339.csv",
+          "sha256": "ec12d65d3807bb2330786d6fdf6ee230ea9aab52a7ba9b38cefce257b6fab2ba"
+        }
+      },
+      "repeat": 2
+    },
+    {
+      "arm": "fixed16",
+      "case": {
+        "bandwidth_mib": 128,
+        "cache_mib": 64,
+        "clients": 8,
+        "expected_checksum": "5696840d948c3a52",
+        "frontend": "concurrent",
+        "id": "mixed-c8-contended-collapsed-concurrent",
+        "identity": "collapsed",
+        "latency_us": 500,
+        "pattern": "mixed",
+        "profile": "contended",
+        "queue": "observable-only",
+        "requests": 256,
+        "seed": 16180339,
+        "trace": {
+          "path": "traces/mixed-c8-s16180339.csv",
+          "sha256": "ec12d65d3807bb2330786d6fdf6ee230ea9aab52a7ba9b38cefce257b6fab2ba"
+        }
+      },
+      "repeat": 2
+    },
+    {
+      "arm": "grow-reset",
+      "case": {
+        "bandwidth_mib": 128,
+        "cache_mib": 64,
+        "clients": 8,
+        "expected_checksum": "c4fa6c297ca75881",
+        "frontend": "concurrent",
+        "id": "sequential-c8-contended-logical-concurrent",
+        "identity": "logical",
+        "latency_us": 500,
+        "pattern": "sequential",
+        "profile": "contended",
+        "queue": "observable-only",
+        "requests": 512,
+        "seed": 16180339,
+        "trace": {
+          "path": "traces/sequential-c8-s16180339.csv",
+          "sha256": "6c3b353fa7e868c5f626f69fdc93235cd5eaa8ea603ee25459eb9585cf7c3d10"
+        }
+      },
+      "repeat": 2
+    },
+    {
+      "arm": "fixed16",
+      "case": {
+        "bandwidth_mib": 128,
+        "cache_mib": 64,
+        "clients": 8,
+        "expected_checksum": "c4fa6c297ca75881",
+        "frontend": "concurrent",
+        "id": "sequential-c8-contended-logical-concurrent",
+        "identity": "logical",
+        "latency_us": 500,
+        "pattern": "sequential",
+        "profile": "contended",
+        "queue": "observable-only",
+        "requests": 512,
+        "seed": 16180339,
+        "trace": {
+          "path": "traces/sequential-c8-s16180339.csv",
+          "sha256": "6c3b353fa7e868c5f626f69fdc93235cd5eaa8ea603ee25459eb9585cf7c3d10"
+        }
+      },
+      "repeat": 2
+    },
+    {
+      "arm": "fixed1024",
+      "case": {
+        "bandwidth_mib": 128,
+        "cache_mib": 64,
+        "clients": 8,
+        "expected_checksum": "c4fa6c297ca75881",
+        "frontend": "concurrent",
+        "id": "sequential-c8-contended-logical-concurrent",
+        "identity": "logical",
+        "latency_us": 500,
+        "pattern": "sequential",
+        "profile": "contended",
+        "queue": "observable-only",
+        "requests": 512,
+        "seed": 16180339,
+        "trace": {
+          "path": "traces/sequential-c8-s16180339.csv",
+          "sha256": "6c3b353fa7e868c5f626f69fdc93235cd5eaa8ea603ee25459eb9585cf7c3d10"
+        }
+      },
+      "repeat": 2
+    },
+    {
+      "arm": "fixed64",
+      "case": {
+        "bandwidth_mib": 128,
+        "cache_mib": 64,
+        "clients": 8,
+        "expected_checksum": "c4fa6c297ca75881",
+        "frontend": "concurrent",
+        "id": "sequential-c8-contended-logical-concurrent",
+        "identity": "logical",
+        "latency_us": 500,
+        "pattern": "sequential",
+        "profile": "contended",
+        "queue": "observable-only",
+        "requests": 512,
+        "seed": 16180339,
+        "trace": {
+          "path": "traces/sequential-c8-s16180339.csv",
+          "sha256": "6c3b353fa7e868c5f626f69fdc93235cd5eaa8ea603ee25459eb9585cf7c3d10"
+        }
+      },
+      "repeat": 2
+    },
+    {
+      "arm": "fixed256",
+      "case": {
+        "bandwidth_mib": 128,
+        "cache_mib": 64,
+        "clients": 8,
+        "expected_checksum": "c4fa6c297ca75881",
+        "frontend": "concurrent",
+        "id": "sequential-c8-contended-logical-concurrent",
+        "identity": "logical",
+        "latency_us": 500,
+        "pattern": "sequential",
+        "profile": "contended",
+        "queue": "observable-only",
+        "requests": 512,
+        "seed": 16180339,
+        "trace": {
+          "path": "traces/sequential-c8-s16180339.csv",
+          "sha256": "6c3b353fa7e868c5f626f69fdc93235cd5eaa8ea603ee25459eb9585cf7c3d10"
+        }
+      },
+      "repeat": 2
+    },
+    {
+      "arm": "adaptive",
+      "case": {
+        "bandwidth_mib": 128,
+        "cache_mib": 64,
+        "clients": 8,
+        "expected_checksum": "c4fa6c297ca75881",
+        "frontend": "concurrent",
+        "id": "sequential-c8-contended-logical-concurrent",
+        "identity": "logical",
+        "latency_us": 500,
+        "pattern": "sequential",
+        "profile": "contended",
+        "queue": "observable-only",
+        "requests": 512,
+        "seed": 16180339,
+        "trace": {
+          "path": "traces/sequential-c8-s16180339.csv",
+          "sha256": "6c3b353fa7e868c5f626f69fdc93235cd5eaa8ea603ee25459eb9585cf7c3d10"
+        }
+      },
+      "repeat": 2
+    }
+  ],
+  "source_sha256_start": {
+    ".clang-format": "33c92ec1a00e31d03cb3b3446379dc08b730da3aa2606ecdca77c39527a79f98",
+    "CMakeLists.txt": "4d31d92197be4a2b0f0a35949e9a13e6407b661fc0fbef91e4659f1551ad13f4",
+    "benchmarks/replay.cpp": "3ad2f416f096d9e77eaf77daf2a8d7da55482b4fec7e277bc70a4eb3723894ad",
+    "calibrate.py": "60eb2009b54a25cbf7519de6d794836f4e041f4c0ef49538012474b2cb79df2b",
+    "experiment.json": "99a629f0742f46478b1ce85a45abaa2ef1297542620d1263429f7afdd4931d33",
+    "include/adaptive_io/io.hpp": "c69ea8ff7a137bc15a305f5b58e92ad6be95bb85deb413cb5be71082c17608c0",
+    "include/adaptive_io/policy.hpp": "ff0162b83971d8ce5f551fa51ea3cf9d4c33e3e5e7389362c07e452f80f01de1",
+    "scripts/generate.py": "74157e7fefe4aedcf17e5f36d43d9b7080428c7d5563adde704de325d79d250a",
+    "scripts/range_server.py": "5db400fe5032511eac23ce3c6e0f70a71c9f9d78b336b62f7b3d2f49d33701ef",
+    "simulate.py": "1f0d645adc679dde0766ac140d6b328a31b2ae4d34092df3c621ad7332db9373",
+    "src/fetch_policy.cpp": "1c645e99a46ca2d9d57f106c7d417737e805be832abd189b98ca8ff58aec7d19",
+    "src/image_reader.cpp": "730f384cd3bc9e10b7657fcfd3cab7317c9ea1a76690582152ca0ca726200fb8",
+    "src/remote_backend.cpp": "960ee0f7f4c6068a9faec0314f72a3b5f805bdf968b2046e4b2c31c35af0e36d",
+    "tests/http_tests.py": "12286db95899c2dba86c67da6a8f82283bd6320c5863d7b9592386b55cf773c4",
+    "tests/io_tests.cpp": "c96e019fa7e0dbc3cf511013c18efcbce00ded68dbf0daef7ff5965d43804d6a",
+    "tests/test_experiment.py": "060a1d87c84d457d2e7924182027230f7eb0cc54e97bf95a08c1ca145c8b30b1"
+  },
+  "stage": "identity",
+  "started_utc": "2026-11-09T19:37:14.537235+00:00"
+}

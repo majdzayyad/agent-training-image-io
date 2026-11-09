@@ -1,0 +1,30 @@
+{
+  "binary_sha256_end": {
+    "reader": "6c8c7eb2ec48e1c969c4fdb53ac58dc241f2a1a4c2b79f78740fdc1959043e98"
+  },
+  "expected_runs": 108,
+  "failures": 0,
+  "finished_utc": "2026-11-09T19:29:37.028370+00:00",
+  "helper_server_stopped": true,
+  "runs": 108,
+  "runs_sha256": "04892897e3a111ca350f2c8e454d85986e422c886e9b58cca71af4673521b32c",
+  "source_sha256_end": {
+    ".clang-format": "33c92ec1a00e31d03cb3b3446379dc08b730da3aa2606ecdca77c39527a79f98",
+    "CMakeLists.txt": "4d31d92197be4a2b0f0a35949e9a13e6407b661fc0fbef91e4659f1551ad13f4",
+    "benchmarks/replay.cpp": "3ad2f416f096d9e77eaf77daf2a8d7da55482b4fec7e277bc70a4eb3723894ad",
+    "calibrate.py": "60eb2009b54a25cbf7519de6d794836f4e041f4c0ef49538012474b2cb79df2b",
+    "experiment.json": "99a629f0742f46478b1ce85a45abaa2ef1297542620d1263429f7afdd4931d33",
+    "include/adaptive_io/io.hpp": "c69ea8ff7a137bc15a305f5b58e92ad6be95bb85deb413cb5be71082c17608c0",
+    "include/adaptive_io/policy.hpp": "ff0162b83971d8ce5f551fa51ea3cf9d4c33e3e5e7389362c07e452f80f01de1",
+    "scripts/generate.py": "74157e7fefe4aedcf17e5f36d43d9b7080428c7d5563adde704de325d79d250a",
+    "scripts/range_server.py": "5db400fe5032511eac23ce3c6e0f70a71c9f9d78b336b62f7b3d2f49d33701ef",
+    "simulate.py": "1f0d645adc679dde0766ac140d6b328a31b2ae4d34092df3c621ad7332db9373",
+    "src/fetch_policy.cpp": "1c645e99a46ca2d9d57f106c7d417737e805be832abd189b98ca8ff58aec7d19",
+    "src/image_reader.cpp": "730f384cd3bc9e10b7657fcfd3cab7317c9ea1a76690582152ca0ca726200fb8",
+    "src/remote_backend.cpp": "960ee0f7f4c6068a9faec0314f72a3b5f805bdf968b2046e4b2c31c35af0e36d",
+    "tests/http_tests.py": "12286db95899c2dba86c67da6a8f82283bd6320c5863d7b9592386b55cf773c4",
+    "tests/io_tests.cpp": "c96e019fa7e0dbc3cf511013c18efcbce00ded68dbf0daef7ff5965d43804d6a",
+    "tests/test_experiment.py": "060a1d87c84d457d2e7924182027230f7eb0cc54e97bf95a08c1ca145c8b30b1"
+  },
+  "start_end_sources_binaries_image_match": true
+}

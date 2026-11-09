@@ -1,0 +1,134 @@
+\documentclass[10pt,twocolumn]{article}
+\usepackage[margin=0.75in]{geometry}
+\usepackage{mathptmx,microtype,amsmath,booktabs}
+\usepackage[numbers,sort&compress]{natbib}
+\usepackage{url,hyperref}
+\hypersetup{colorlinks=true,urlcolor=blue,citecolor=blue,linkcolor=blue,
+  pdftitle={Adaptive Image Reads for Agent Training},
+  pdfauthor={Majd Zayyad}}
+\setlength{\emergencystretch}{1.5em}
+\Urlmuskip=0mu plus 1mu
+\title{\bfseries Adaptive Image Reads for Agent Training}
+\author{Majd Zayyad}
+\date{November 2026}
+\begin{document}
+\maketitle
+
+\begin{abstract}
+An agent-training job can leave its learner waiting for tools that are
+still fetching files from a remote image. Reading larger chunks reduces
+requests but can waste bandwidth; smaller chunks have the opposite cost.
+We study a reader that chooses how much to fetch from recent access
+patterns and observed request cost. The question is whether this local
+decision shortens the complete training job.
+We combine measured image-read jobs with a training scheduler that includes
+model calls, tool computation, queues, and learner updates.
+\input{generated/abstract-result}
+The experiments explain when image-read savings reach the learner, and
+when other work absorbs them.
+\end{abstract}
+
+\section{Why image reads matter}
+Agentic training repeatedly turns model output into actions: inspect a
+repository, import a library, compile a program, or run tests. Those tools
+need files inside their sandbox. With remote-backed images, some of the
+files arrive only when read. If tools finish late, a training update can
+wait even when the learner itself is ready.
+
+DSec's microVM storage path illustrates this setting: it uses OverlayBD
+and fetches image data in 256\,KiB chunks~\cite{dsec2026}. A fixed size
+is simple, but the useful amount of data differs between a short import,
+a scattered lookup, and a sequential scan. The opportunity is to change
+the fetch size without giving the reader more cache memory.
+
+Read-ahead already adapts to sequential access, as in AMP~\cite{amp2007}.
+TIP and Khameleon connect prefetching decisions to cost or expected
+usefulness~\cite{tip1995,khameleon2020}. AdaCache selects aligned blocks
+for known missing intervals~\cite{adacache2023}; WaRP plans object-store
+requests from intervals already known to be required~\cite{warp2026}.
+Our reader instead chooses a blocking refill before the next tool read
+is known. It combines likely continuation with the cost of the aligned
+windows that the current read would cross.
+
+The endpoint matters as much as the reader decision:
+\emph{does adaptive fetching reduce the time to finish the same amount
+of training work?} A faster image-read benchmark alone cannot answer
+that question.
+
+\input{generated/results-table}
+
+\section{Reader and training experiment}
+\paragraph{Choosing a refill.}
+The reader considers aligned windows from 16\,KiB to 1\,MiB. Recent
+adjacent reads suggest that a stream will continue; jumps reduce that
+expectation. Completed requests update its estimate of fixed request
+cost and transfer rate. It selects the window with the lowest
+\[
+  \frac{\text{estimated fetch time}}{\text{bytes likely to be used}}.
+\]
+The cost includes crossing multiple windows, not just the requested
+byte count. Cache capacity, replacement, workers, and in-flight limits
+are unchanged. Extra bytes arrive inside the blocking refill; there is
+no asynchronous prefetcher. The implementation and parameter definitions
+are in the accompanying code.
+
+\paragraph{Measured tool-stage input.}
+An independent C++ reader accesses a 512\,MiB image over loopback HTTP
+with a 64\,MiB cache. Random, sequential, and mixed traces are tested at three
+concurrency levels and under three controlled latency/bandwidth settings, giving
+27 conditions. Each has three measured repetitions. Timing covers the
+entire replay process, including setup and drain. Only client-observable
+timings reach the controller.
+
+All controls use the same executable. Alongside fixed256, we test other
+fixed sizes, choose one static setting on separate development traces,
+and include a simple grow/reset rule. That rule increases its window on
+successive missed demands and resets after a jump. Every measurement
+checks the returned data and common resource budgets.
+
+\paragraph{From tool time to training time.}
+We use each measured replay duration as the cost of one synthetic
+image-read job, not as a pure storage latency. A rollout consists of
+setup, a model call, the image-read job, additional tool computation,
+another model call, verification, and teardown. The simulator queues
+these stages behind limited actor, model, CPU, and tool-worker capacity.
+A learner update starts only after its assigned rollouts finish; the
+next update's rollouts wait for that update.
+
+Every simulated run completes the same 256 rollouts and eight learner
+updates. Policies share job order, service-time variation, non-I/O work,
+and resources. We vary the cost of model calls, tool computation, and
+learner updates to expose different reasons a training job might wait.
+The clock stops after the final update, not after the last image read.
+
+Each tool worker has an independent reader/backend budget, and each
+image-read job starts with an empty reader cache. This is a controlled
+execution-time model: it does not simulate learning quality, real
+repository tasks, warm sandbox reuse, or contention inside a shared
+3FS service. Complete parameters, individual outcomes, and descriptive
+intervals are provided with the data.
+
+\section{What changes total training time?}
+\input{generated/results-text}
+
+These results make the deployment question more concrete. Image
+fetching deserves attention when it delays the supply of usable
+rollouts. When model calls, CPU work, or learner updates dominate,
+moving fewer bytes is not the same as finishing training much sooner.
+Preserving the identity of independent read streams is also part of
+the design, rather than a detail to leave to the storage integration.
+
+The next step is to replace generated read jobs with captured coding-tool
+work and compare matched training runs. The current experiment answers
+the execution-time question under explicit assumptions; actual
+time-to-quality remains to be measured.
+
+\paragraph{Code and reproduction.}
+Source, calibration data, the full simulation matrix, and commands for
+recollecting the measurements and rebuilding this paper are public at
+\url{https://github.com/majdzayyad/agent-training-image-io}.
+Release \texttt{v1.0.0} fixes the version used here.
+
+\bibliographystyle{plainnat}
+\bibliography{background,refill}
+\end{document}

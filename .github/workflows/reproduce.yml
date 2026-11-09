@@ -1,0 +1,26 @@
+name: Reproduce
+on:
+  push:
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  reader-and-simulation:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09
+        with:
+          persist-credentials: false
+      - name: Install reader build dependencies
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y --no-install-recommends g++ cmake ninja-build libcurl4-openssl-dev python3
+      - name: Build and check the reader and scheduler
+        run: |
+          cmake -S . -B build -G Ninja -DCMAKE_BUILD_TYPE=Release
+          cmake --build build -j2
+          ctest --test-dir build --output-on-failure
+      - name: Reproduce the full reference-data simulation
+        run: python3 reproduce.py --output ci-reference

@@ -1,0 +1,10 @@
+cff-version: 1.2.0
+message: "Please cite the accompanying paper when using these experiments."
+title: "Adaptive Image Reads for Agent Training"
+authors:
+  - family-names: "Zayyad"
+    given-names: "Majd"
+version: 1.0.0
+date-released: 2026-11-09
+url: "https://github.com/majdzayyad/agent-training-image-io"
+repository-code: "https://github.com/majdzayyad/agent-training-image-io"
