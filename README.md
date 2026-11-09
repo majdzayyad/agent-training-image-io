@@ -1,7 +1,5 @@
 # Adaptive Image Reads for Agent Training
 
-**Majd Zayyad**
-
 Does a smarter image reader finish the same training-execution work sooner, excluding model inference?
 
 This repository measures a C++ image reader, then feeds complete read-job durations into a fixed-work scheduler. The current endpoint counts setup, image reads, tool computation, non-inference resource queues, verification, teardown and learner updates. Model inference is instantaneous and does not use a model-worker queue. It compares adaptive refill sizing with fixed sizes and a simple grow/reset rule.
