@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Fixed-work synchronous training simulation driven by measured image-read jobs."""
+"""Matched training-execution analysis with explicit inference accounting."""
 
 import argparse
 import collections
@@ -46,7 +46,7 @@ def make_work(config, profile, seed):
     return work, hashlib.sha256(encoded).hexdigest()
 
 
-def simulate_batch(jobs, capacities):
+def simulate_batch(jobs, capacities, *, include_inference=True):
     if not jobs or any(len(job) != len(KINDS) for job in jobs):
         raise ValueError("each nonempty batch needs complete rollout phases")
     if any(not math.isfinite(value) or value < 0 for job in jobs for value in job):
@@ -60,14 +60,16 @@ def simulate_batch(jobs, capacities):
     waits = {kind: 0.0 for kind in active}
     peak = {kind: 0 for kind in active}
     pending = collections.deque(range(len(jobs)))
+    kinds = tuple("delay" if kind == "inference" and not include_inference else kind
+                  for kind in KINDS)
     events = []
     serial = 0
     completed = 0
 
     def launch(now, job, phase, arrived):
         nonlocal serial
-        kind = KINDS[phase]
-        duration = jobs[job][phase]
+        kind = kinds[phase]
+        duration = 0.0 if KINDS[phase] == "inference" and not include_inference else jobs[job][phase]
         if kind != "delay":
             active[kind] += 1
             peak[kind] = max(peak[kind], active[kind])
@@ -77,7 +79,7 @@ def simulate_batch(jobs, capacities):
         heapq.heappush(events, (now + duration, serial, job, phase))
 
     def submit(now, job, phase):
-        kind = KINDS[phase]
+        kind = kinds[phase]
         if kind == "delay" or active[kind] < capacities[kind]:
             launch(now, job, phase, now)
         else:
@@ -88,7 +90,7 @@ def simulate_batch(jobs, capacities):
     now = 0.0
     while events:
         now, _, job, phase = heapq.heappop(events)
-        kind = KINDS[phase]
+        kind = kinds[phase]
         if kind != "delay":
             active[kind] -= 1
             if queues[kind]:
@@ -106,7 +108,7 @@ def simulate_batch(jobs, capacities):
             "summed_resource_wait_s": waits, "peak_occupancy": peak}
 
 
-def training_time(work, tool_seconds):
+def training_time(work, tool_seconds, *, include_inference=True):
     if not math.isfinite(tool_seconds) or tool_seconds < 0:
         raise ValueError("invalid measured tool duration")
     total = rollout_time = learner_time = 0.0
@@ -118,7 +120,7 @@ def training_time(work, tool_seconds):
         jobs = [job.copy() for job in update["jobs"]]
         for job in jobs:
             job[2] *= tool_seconds
-        batch = simulate_batch(jobs, work["resources"])
+        batch = simulate_batch(jobs, work["resources"], include_inference=include_inference)
         total += batch["wall_s"] + update["learner_s"]
         rollout_time += batch["wall_s"]
         learner_time += update["learner_s"]
@@ -132,7 +134,19 @@ def training_time(work, tool_seconds):
         "completed_rollouts": completed, "completed_updates": len(work["updates"]),
         "model_calls": 2 * completed, "resource_busy_s": busy,
         "summed_resource_wait_s": waits, "peak_occupancy": peak,
+        "inference_accounting": "included" if include_inference else "excluded",
     }
+
+
+def verify_source_snapshot(source_identity):
+    analysis_files = {"simulate.py", "tests/test_experiment.py"}
+    for relative, expected_hash in source_identity.items():
+        if digest(ROOT / relative) == expected_hash:
+            continue
+        archived = ROOT / "provenance" / "calibration-v1" / relative
+        if relative in analysis_files and archived.is_file() and digest(archived) == expected_hash:
+            continue
+        raise ValueError(f"measured reader/calibration source changed: {relative}")
 
 
 def load_calibration(directory, protocol):
@@ -161,9 +175,7 @@ def load_calibration(directory, protocol):
             raise ValueError("calibration stages used different source")
         if binary_identity != manifest["binary_sha256"]:
             raise ValueError("calibration stages used different reader builds")
-        for relative, expected_hash in source_identity.items():
-            if digest(ROOT / relative) != expected_hash:
-                raise ValueError(f"measured experiment source changed: {relative}")
+        verify_source_snapshot(source_identity)
         seen = set()
         checksums = {}
         for index, (row, specification) in enumerate(zip(rows, manifest["sequence"])):
@@ -224,7 +236,7 @@ def offline_fixed_choices(rows):
             raise ValueError("incomplete fixed-size oracle inputs")
         choices[case] = min(
             groups, key=lambda arm: (
-                statistics.fmean(math.log(row["training_s"]) for row in groups[arm]),
+                statistics.fmean(math.log(row["execution_s"]) for row in groups[arm]),
                 int(arm.removeprefix("fixed")),
             )
         )
@@ -250,14 +262,14 @@ def summarize(rows, candidate, baseline, baseline_by_case=None):
         if control is None:
             raise ValueError("missing paired simulation")
         for invariant in ("work_sha256", "completed_rollouts", "completed_updates", "model_calls",
-                          "logical_bytes_per_job", "logical_checksum"):
+                          "logical_bytes_per_job", "logical_checksum", "inference_accounting"):
             if row[invariant] != control[invariant]:
                 raise ValueError(f"unequal work: {invariant}")
-        log_ratio = math.log(row["training_s"] / control["training_s"])
+        log_ratio = math.log(row["execution_s"] / control["execution_s"])
         pairs[repeat].append(log_ratio)
         by_case[case][repeat].append(log_ratio)
-        baseline_times.append(math.log(control["training_s"]))
-        candidate_times.append(math.log(row["training_s"]))
+        baseline_times.append(math.log(control["execution_s"]))
+        candidate_times.append(math.log(row["execution_s"]))
     if not pairs or len({len(values) for values in pairs.values()}) != 1:
         raise ValueError("unbalanced repeat blocks")
     conditions = {
@@ -279,32 +291,45 @@ def summarize(rows, candidate, baseline, baseline_by_case=None):
     }
 
 
-def run(calibration, output):
+def run(calibration, output, analysis_path=None):
     protocol = json.loads((ROOT / "experiment.json").read_text())
+    analysis_path = Path(analysis_path) if analysis_path is not None else ROOT / "analysis.json"
+    analysis = json.loads(analysis_path.read_text())
+    accounting = analysis["inference_accounting"]
+    profiles = analysis["profiles"]
+    if accounting not in ("included", "excluded"):
+        raise ValueError("inference accounting must be included or excluded")
+    if (not profiles or len(set(profiles)) != len(profiles) or
+            any(name not in protocol["simulation"]["profiles"] for name in profiles)):
+        raise ValueError("invalid analysis profile selection")
+    include_inference = accounting == "included"
     datasets, selection = load_calibration(calibration, protocol)
     output.mkdir(parents=True, exist_ok=False)
     config = protocol["simulation"]
     plans = {
-        (profile, seed): make_work(config, values, seed)
-        for profile, values in config["profiles"].items()
+        (profile, seed): make_work(config, config["profiles"][profile], seed)
+        for profile in profiles
         for seed in config["schedule_seeds"]
     }
     input_hashes = {stage: digest(calibration / stage / "runs.jsonl") for stage in datasets}
     manifest = {
         "protocol": protocol, "protocol_sha256": digest(ROOT / "experiment.json"),
         "simulator_sha256": digest(Path(__file__)), "calibration_sha256": input_hashes,
+        "analysis": analysis, "analysis_sha256": digest(analysis_path),
         "development_selection": selection,
-        "endpoint": "simulated seconds through the final fixed-work learner update, not simulator execution time",
+        "endpoint": analysis["metric"],
     }
     write_new(output / "manifest.json", manifest)
     rows = []
     with (output / "runs.jsonl").open("x") as journal:
         for stage in ("evaluation", "identity"):
             for measured in datasets[stage]:
-                for profile in config["profiles"]:
+                for profile in profiles:
                     for seed in config["schedule_seeds"]:
                         work, fingerprint = plans[profile, seed]
-                        value = training_time(work, measured["process_wall_s"])
+                        value = training_time(work, measured["process_wall_s"],
+                                              include_inference=include_inference)
+                        value["execution_s"] = value.pop("training_s")
                         row = {
                             "stage": stage, "case": measured["case"], "arm": measured["arm"],
                             "repeat": measured["repeat"], "schedule_seed": seed,
@@ -322,7 +347,7 @@ def run(calibration, output):
     selected = selection["choice"]["arm"]
     for stage in ("evaluation", "identity"):
         summaries[stage] = {}
-        for profile in config["profiles"]:
+        for profile in profiles:
             values = [row for row in rows if row["stage"] == stage and
                       row["training_profile"] == profile]
             summaries[stage][profile] = {
@@ -338,16 +363,19 @@ def run(calibration, output):
                 "interpretation": "Best tested fixed setting chosen on evaluation data per condition; nondeployable. Intervals do not account for selection.",
             }
     expected = sum(protocol["stages"][stage]["expected_runs"] for stage in ("evaluation", "identity"))
-    expected *= len(config["profiles"]) * len(config["schedule_seeds"])
+    expected *= len(profiles) * len(config["schedule_seeds"])
     if len(rows) != expected:
         raise RuntimeError("incomplete simulation matrix")
     if (digest(Path(__file__)) != manifest["simulator_sha256"] or
             digest(ROOT / "experiment.json") != manifest["protocol_sha256"] or
+            digest(analysis_path) != manifest["analysis_sha256"] or
             any(digest(calibration / stage / "runs.jsonl") != value
                 for stage, value in input_hashes.items())):
         raise RuntimeError("simulation code, protocol or calibration changed during execution")
     summary = {
-        "question": protocol["question"], "simulated_runs": len(rows),
+        "question": analysis["question"], "simulated_runs": len(rows),
+        "metric": analysis["metric"], "inference_accounting": accounting,
+        "analysis": analysis, "analysis_sha256": manifest["analysis_sha256"],
         "physical_calibration_runs": sum(len(values) for values in datasets.values()),
         "selected_fixed": selected, "protocol_sha256": manifest["protocol_sha256"],
         "simulator_sha256": manifest["simulator_sha256"], "raw_sha256": digest(output / "runs.jsonl"),
@@ -360,7 +388,8 @@ def run(calibration, output):
     })
     print(json.dumps({
         "simulated_runs": len(rows), "selected_fixed": selected,
-        "training_time_reduction_pct": {
+        "inference_accounting": accounting,
+        "execution_time_reduction_pct": {
             name: {baseline: value["reduction_pct"] for baseline, value in values.items()}
             for name, values in summaries["evaluation"].items()
         },
@@ -371,5 +400,6 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--calibration", type=Path, default=ROOT / "data" / "reference")
     parser.add_argument("--output", type=Path, required=True)
+    parser.add_argument("--analysis", type=Path, default=ROOT / "analysis.json")
     args = parser.parse_args()
-    run(args.calibration.resolve(), args.output.resolve())
+    run(args.calibration.resolve(), args.output.resolve(), args.analysis.resolve())

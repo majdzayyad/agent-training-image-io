@@ -20,6 +20,7 @@ def change(percent):
 
 def render(results, calibration, output, pdf=False):
     protocol = json.loads((ROOT / "experiment.json").read_text())
+    analysis = json.loads((ROOT / "analysis.json").read_text())
     load_calibration(calibration, protocol)
     summary = json.loads((results / "summary.json").read_text())
     complete = json.loads((results / "complete.json").read_text())
@@ -27,6 +28,8 @@ def render(results, calibration, output, pdf=False):
             summary["raw_sha256"] != complete["runs_sha256"] or
             complete["runs"] != complete["expected_runs"] or
             summary["protocol_sha256"] != digest(ROOT / "experiment.json") or
+            summary["analysis_sha256"] != digest(ROOT / "analysis.json") or
+            summary["inference_accounting"] != "excluded" or
             summary["simulator_sha256"] != digest(ROOT / "simulate.py")):
         raise ValueError("paper inputs do not match the completed experiment")
     output.mkdir(parents=True, exist_ok=False)
@@ -36,19 +39,20 @@ def render(results, calibration, output, pdf=False):
         shutil.copy2(ROOT / "paper" / name, output / name)
     values = summary["results"]["evaluation"]
     tool = values["tool_wait"]["fixed256"]
-    model = values["model_wait"]["fixed256"]
+    learner = values["learner_wait"]["fixed256"]
     (generated / "abstract-result.tex").write_text(
-        f'Across the calibrated read conditions, simulated training time is '
+        f'Across the calibrated read conditions, inference-excluded execution time is '
         f'{change(tool["reduction_pct"])} when the other stages are short, and '
-        f'{change(model["reduction_pct"])} with long model calls, relative to fixed256. '
-        'The effect depends on where the job waits; losing stream identity can reverse it.\n'
+        f'{change(learner["reduction_pct"])} with long learner updates, relative to fixed256. '
+        'The gains depend on read locality and the remaining work; losing stream identity can reverse them.\n'
     )
     table = [
         "\\begin{table*}[t]\\centering\\small\n"
         "\\begin{tabular}{lrrr}\\toprule\n"
-        "Training setting & Fixed256 (s) & Adaptive (s) & Time saved\\\\\\midrule\n"
+        "Execution setting & Fixed256 (s) & Adaptive (s) & Time saved\\\\\\midrule\n"
     ]
-    for profile, configuration in protocol["simulation"]["profiles"].items():
+    for profile in analysis["profiles"]:
+        configuration = protocol["simulation"]["profiles"][profile]
         value = values[profile]["fixed256"]
         label = "Short compute stages" if profile == "tool_wait" else configuration["label"]
         table.append(
@@ -57,9 +61,10 @@ def render(results, calibration, output, pdf=False):
         )
     table.append(
         "\\bottomrule\\end{tabular}\n"
-        "\\caption{Total simulated time through the final learner update: geometric "
-        "means across 27 read conditions with identical work in every arm. "
-        "These are model results, not measured GPU training runs.}"
+        "\\caption{Inference-excluded execution time through the final learner update: "
+        "geometric means across 27 read conditions. Setup, tool work, verification, "
+        "teardown and learner updates remain counted. These are not end-to-end "
+        "training wall-clock speedups.}"
         "\\label{tab:training}\\end{table*}\n"
     )
     (generated / "results-table.tex").write_text("".join(table))
@@ -69,15 +74,15 @@ def render(results, calibration, output, pdf=False):
         "sequential-c8-contended-collapsed-serialized"
     ]
     text = (
-        f'Table~\\ref{{tab:training}} reports the training endpoint rather than the '
-        f'isolated reader endpoint. With short compute stages, adaptive fetching gives '
-        f'{change(tool["reduction_pct"])} total time against fixed256. '
+        f'Table~\\ref{{tab:training}} reports the execution endpoint with inference '
+        f'excluded. With short compute stages, adaptive fetching gives '
+        f'{change(tool["reduction_pct"])} completion time against fixed256. '
         f'The development traces selected \\texttt{{{summary["selected_fixed"]}}}; '
-        f'against that static setting, training time is {change(tuned["reduction_pct"])}. '
+        f'against that static setting, execution time is {change(tuned["reduction_pct"])}. '
         f'Against grow/reset it is {change(grow["reduction_pct"])} in the same setting.\n\n'
         'Stream handling provides a more serious counterexample. In the sequential '
-        'condition that collapses stream IDs behind a serialized frontend, simulated '
-        f'training takes {identity["candidate_over_baseline"]:.2f}$\\times$ fixed256 time '
+        'condition that collapses stream IDs behind a serialized frontend, inference-excluded '
+        f'execution takes {identity["candidate_over_baseline"]:.2f}$\\times$ fixed256 time '
         'when other stages are short. Interleaved reads no longer look sequential to '
         'the policy; the read-job records show a shift toward small refills and more requests. '
         'The frontend setting is identical in both arms. This is a simulated failure '
@@ -86,10 +91,13 @@ def render(results, calibration, output, pdf=False):
     (generated / "results-text.tex").write_text(text)
     write_new(output / "paper-inputs.json", {
         "protocol_sha256": summary["protocol_sha256"],
+        "analysis_sha256": summary["analysis_sha256"],
+        "metric": summary["metric"],
+        "inference_accounting": summary["inference_accounting"],
         "simulation_rows_sha256": summary["raw_sha256"],
         "summary_sha256": digest(results / "summary.json"),
         "repository": "https://github.com/majdzayyad/agent-training-image-io",
-        "release": "v1.0.0", "author": "Majd Zayyad",
+        "release": analysis["release"], "author": "Majd Zayyad",
     })
     if pdf:
         commands = [

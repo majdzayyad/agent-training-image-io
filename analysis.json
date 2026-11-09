@@ -1,0 +1,15 @@
+{
+  "schema": 1,
+  "version": "non-inference-v1",
+  "release": "v1.1.0",
+  "question": "Does adaptive image fetching reduce the execution time of equal agent-training work when model inference is excluded?",
+  "metric": "training_execution_time_excluding_inference",
+  "inference_accounting": "excluded",
+  "profiles": ["tool_wait", "cpu_wait", "learner_wait"],
+  "included_work": ["sandbox setup", "image-read jobs", "tool CPU work", "non-inference resource queues", "verification", "teardown", "learner updates"],
+  "removed_work": ["model-call service duration", "model-worker queueing"],
+  "method": "Make inference stages instantaneous and bypass their resource pool, then resimulate the schedule. Do not subtract summed inference service or wait durations from wall time.",
+  "interpretation": "A counterfactual, inference-excluded completion time for fixed work, not an actual end-to-end training wall-clock speedup.",
+  "profile_selection": "The former long-model-call profile is omitted because it becomes identical to the short-compute profile once inference service and its queue are removed. All read conditions, fixed controls, and identity cases are retained.",
+  "prior_results": "The inference-included v1.0.0 release and data/reference/simulation remain unchanged."
+}

@@ -1,6 +1,21 @@
 # Experiment details
 
-The main paper asks one question: whether adaptive image fetching reduces the completion time of equal training work. This file supplies the details needed to inspect and reproduce that answer.
+The main paper asks whether adaptive image fetching reduces the completion time of equal training-execution work **excluding model inference**. `analysis.json` defines the current endpoint separately from the unchanged reader-calibration protocol in `experiment.json`.
+
+## Why DSec motivates this adaptation
+
+DSec v1, Section 5.3 (printed pages 16-17), describes reusing the production training filesystem, 3FS, for on-demand sandbox images. It reports high throughput for large sequential transfers and weak small-random-I/O performance in that setting. DSec responds with local writes, local metadata where the image format permits, and bulk demand reads; its OverlayBD/ublk path fetches 256 KiB chunks into a local L2 cache.
+
+The relevant pattern is workload-aware I/O granularity: amortize per-request cost without excessive read amplification. The primary AWS Lambda paper's Section 2 chunking discussion says that smaller chunks can improve highly random loading, whereas larger chunks reduce metadata/request counts and provide sequential read-ahead. AMP's Sections II.B-II.C describe adaptive read-ahead degree; its Section III analysis relates transfer size to fixed-plus-size-dependent service cost.
+
+This is a performance mismatch, not a claim that 3FS only supports sequential access. Its own README explicitly describes random-access dataloaders. Our independent HTTP reader tests a client-side sizing policy; it does not demonstrate a changed production 3FS deployment.
+
+Primary sources:
+
+- DSec: https://arxiv.org/html/2609.22978v1#S5.SS3
+- Lambda: https://www.usenix.org/system/files/atc23-brooker.pdf
+- AMP: https://www.usenix.org/legacy/events/fast07/tech/full_papers/gill/gill.pdf
+- 3FS capabilities: https://github.com/deepseek-ai/3FS#diverse-workloads
 
 ## Reader calibration
 
@@ -48,11 +63,13 @@ Each of eight updates receives 32 rollouts. At most eight actors are active. A r
 5. A second model call.
 6. Verification and teardown.
 
-Model calls, CPU work and read jobs each use four service slots with FIFO queues. A completed rollout frees its actor slot. After all 32 rollouts finish, the learner performs its update; no rollout for the next update starts before that update completes. This is a synchronous, fixed-work execution model, not an asynchronous trainer or a model of changing policy quality.
+In v1.0.0, model calls, CPU work and read jobs each used four service slots with FIFO queues. In the current analysis, model-call placeholders are instantaneous and bypass the inference pool completely. CPU and read-job queues retain their capacities. A completed rollout frees its actor slot. After all 32 rollouts finish, the learner performs its update; no rollout for the next update starts before that update completes.
 
-The measured whole-process duration replaces only the read-job stage. The other costs are controlled assumptions:
+This is a counterfactual, synchronous execution benchmark. It is not the old elapsed time minus summed inference service or wait time: those quantities overlap across workers, and removing inference changes queue arrivals. The scheduler recomputes all remaining waits and overlaps. Tests require the excluded endpoint to be independent of model-call duration and inference-worker capacity, with zero inference busy time and queue wait.
 
-| Setting | Each model call | Tool CPU work | Learner update |
+The measured whole-process duration replaces only the read-job stage. The shared work specification retains the following service inputs; `analysis.json` disables inference and selects the three non-redundant profiles:
+
+| Shared profile | Nominal model call (ignored now) | Tool CPU work | Learner update |
 |---|---:|---:|---:|
 | Short non-I/O stages | 0.05 s | 0.02 s | 0.2 s |
 | Long model calls | 5 s | 0.02 s | 0.2 s |
@@ -63,11 +80,13 @@ Setup, verification and teardown are respectively 0.02, 0.01 and 0.01 s. The dec
 
 Each tool slot represents an independently provisioned reader/backend budget. Shared-backend contention between slots is not inferred by multiplying one bandwidth budget. Each calibrated job has a fresh reader, so warm-cache reuse is not modeled. A job may contain multiple logical read streams internally; those streams are not the scheduler's actor slots.
 
-The endpoint is simulated elapsed time after the final learner update. All policies must match rollout/update/model-call counts, logical read data, and the non-I/O work fingerprint. Summed resource waits or busy times are not interpreted as removable fractions of total training time.
+The endpoint is simulated completion after the final learner update with inference service and inference queueing removed. Setup, read-job time, tool CPU work, verification, teardown, learner updates and all other queueing remain. All policies must match rollout/update/model-call-placeholder counts, logical read data, inference-accounting mode and the work fingerprint. Summed resource waits or busy times are not subtracted from wall time.
+
+New raw rows use `execution_s` and explicitly record `inference_accounting`. The library's `training_time` helper retains its inference-included default for compatibility and testing; the command-line experiment passes the accounting mode from `analysis.json` explicitly.
 
 ## Analysis
 
-For each condition, training setting, measured repeat and schedule seed, compare paired total simulated times. Average log ratios across scheduling seeds **inside** a measured-repeat block. Aggregate conditions equally within that block, then form a descriptive Student-t interval across the three physical repeats. Scheduling seeds do not increase the count of physical measurements.
+For each condition, selected compute setting, measured repeat and schedule seed, compare paired inference-excluded completion times. Average log ratios across scheduling seeds **inside** a measured-repeat block. Aggregate conditions equally within that block, then form a descriptive Student-t interval across the three physical repeats. Scheduling seeds do not increase the count of physical measurements.
 
 The main table uses geometric times, so its ratio is consistent with the reported geometric reduction. `summary.json` also includes every condition, point regressions, ranges and intervals. These quantify a controlled simulation conditioned on a small calibration dataset, not uncertainty over production training deployments.
 
@@ -82,3 +101,5 @@ The closest-method review did not establish exact algorithm identity or a firstn
 This experiment does not run an actual LLM, learner, task verifier, production DSec service or 3FS deployment. Synthetic read families are not a representative repository/task/image distribution. A practical time-to-training-quality claim needs captured real tool work, a representative storage path and matched actual learning runs.
 
 Source/input/binary hashes and exclusive-create output protect the retained experiment from accidental changes. They establish local consistency, not externally timestamped preregistration.
+
+The physical records are reused without edits. Their manifests also captured `simulate.py` and its test file, although neither affected the reader's measured duration. Their original v1.0.0 bytes are preserved in `provenance/calibration-v1/`; only those two analysis/test files may be validated against that archive. Every reader, replay, input-generator, calibration-harness and build file must still match the active source. Fresh calibration validates the current files normally. Earlier inference-included results remain in their original data directory and release.

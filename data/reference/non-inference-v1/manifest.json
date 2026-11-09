@@ -1,0 +1,274 @@
+{
+  "analysis": {
+    "included_work": [
+      "sandbox setup",
+      "image-read jobs",
+      "tool CPU work",
+      "non-inference resource queues",
+      "verification",
+      "teardown",
+      "learner updates"
+    ],
+    "inference_accounting": "excluded",
+    "interpretation": "A counterfactual, inference-excluded completion time for fixed work, not an actual end-to-end training wall-clock speedup.",
+    "method": "Make inference stages instantaneous and bypass their resource pool, then resimulate the schedule. Do not subtract summed inference service or wait durations from wall time.",
+    "metric": "training_execution_time_excluding_inference",
+    "prior_results": "The inference-included v1.0.0 release and data/reference/simulation remain unchanged.",
+    "profile_selection": "The former long-model-call profile is omitted because it becomes identical to the short-compute profile once inference service and its queue are removed. All read conditions, fixed controls, and identity cases are retained.",
+    "profiles": [
+      "tool_wait",
+      "cpu_wait",
+      "learner_wait"
+    ],
+    "question": "Does adaptive image fetching reduce the execution time of equal agent-training work when model inference is excluded?",
+    "release": "v1.1.0",
+    "removed_work": [
+      "model-call service duration",
+      "model-worker queueing"
+    ],
+    "schema": 1,
+    "version": "non-inference-v1"
+  },
+  "analysis_sha256": "fdb6078d1cdf36dde78da7fcf821f05765575bbd2ca00a5a9df6fcf9309a92aa",
+  "calibration_sha256": {
+    "development": "04892897e3a111ca350f2c8e454d85986e422c886e9b58cca71af4673521b32c",
+    "evaluation": "535240c30b67fe544f4937b2c5e7f797ea5f8d66c4a3a7ded5c0e0a6d7a68814",
+    "identity": "0e23835e145860bd9689a3ff294b46a5de09e95d0c0a3aef2b67d72aad2240fc"
+  },
+  "development_selection": {
+    "choice": {
+      "arm": "fixed64",
+      "geometric_process_wall_s": {
+        "fixed1024": 0.5050553650330639,
+        "fixed16": 0.3495180102910298,
+        "fixed256": 0.2710995059729839,
+        "fixed64": 0.23991634824198851
+      }
+    },
+    "created_utc": "2026-11-09T19:29:37.028750+00:00",
+    "development_directory": "training-v1-development",
+    "protocol_sha256": "99a629f0742f46478b1ce85a45abaa2ef1297542620d1263429f7afdd4931d33",
+    "runs_sha256": "04892897e3a111ca350f2c8e454d85986e422c886e9b58cca71af4673521b32c"
+  },
+  "endpoint": "training_execution_time_excluding_inference",
+  "protocol": {
+    "arms": {
+      "adaptive": {
+        "binary": "reader",
+        "policy": "adaptive-v1"
+      },
+      "fixed1024": {
+        "binary": "reader",
+        "policy": "fixed1024"
+      },
+      "fixed16": {
+        "binary": "reader",
+        "policy": "fixed16"
+      },
+      "fixed256": {
+        "binary": "reader",
+        "policy": "fixed256"
+      },
+      "fixed64": {
+        "binary": "reader",
+        "policy": "fixed64"
+      },
+      "grow-reset": {
+        "binary": "reader",
+        "policy": "adaptive-v1",
+        "rule": "grow-reset"
+      }
+    },
+    "author": "Majd Zayyad",
+    "cache_mib": 64,
+    "execution": {
+      "failures": "Retain every failure/timeout. Do not simulate or score an incomplete or invalid calibration matrix.",
+      "freeze": "Record source, protocol, input and binary hashes before/after calibration; preserve every condition and do not retune from evaluation outcomes.",
+      "scope": "A parameterized execution-time experiment, not actual RL training or a production DSec evaluation.",
+      "timing": "One physical calibration arm at a time; cold per-process reader, deliberately warmed backing file."
+    },
+    "image": {
+      "bytes": 536870912,
+      "seed": 20261110,
+      "sha256": "1494e691a1d145fc18bbfde50ce2857db5c447c2d734e4ec3afa5dcdca2c0a19"
+    },
+    "inflight_mib": 8,
+    "order_seed": 2026110921,
+    "primary_endpoint": "Simulated wall time through the final learner update, with identical completed rollouts, model calls, verification and update work.",
+    "profiles": {
+      "contended": {
+        "bandwidth_mib": 128,
+        "latency_us": 500
+      },
+      "latency": {
+        "bandwidth_mib": 512,
+        "latency_us": 2000
+      },
+      "nearby": {
+        "bandwidth_mib": 0,
+        "latency_us": 0
+      }
+    },
+    "question": "When does adaptive image fetching reduce the completion time of a fixed-work, synchronous agent-training simulation?",
+    "queue_feedback": "observable-only",
+    "repeats": 3,
+    "schema": 1,
+    "selection": "Choose the fixed size minimizing equal-case/equal-repeat geometric process wall time on development only; numerical size breaks exact ties. Freeze before evaluation.",
+    "simulation": {
+      "actors": 8,
+      "cpu_workers": 4,
+      "inference": "Average schedule-seed log ratios within each calibration repeat, then form descriptive Student-t intervals across the three measured repeats. Schedule seeds are not additional physical measurements.",
+      "inference_workers": 4,
+      "learner_rule": "Each update waits for all 32 assigned rollouts; no next-update rollout starts until that update finishes. All arms complete 256 rollouts and 8 updates.",
+      "not_modeled": [
+        "Actual policy learning or time to a quality target",
+        "Live LLM agents, rewards or task success distributions",
+        "Cross-host 3FS/RDMA or shared-backend interference",
+        "Warm-cache lifecycle reuse or compression translation",
+        "An empirical distribution of production training workloads"
+      ],
+      "pairing": "Hold each measured repeat fixed across schedule seeds. The same work descriptors, jitter, task order, model/CPU/learner durations and resources are used for every policy.",
+      "profiles": {
+        "cpu_wait": {
+          "cpu_s": 5.0,
+          "inference_s": 0.05,
+          "label": "Long tool computation",
+          "learner_s": 0.2
+        },
+        "learner_wait": {
+          "cpu_s": 0.02,
+          "inference_s": 0.05,
+          "label": "Long learner updates",
+          "learner_s": 20.0
+        },
+        "model_wait": {
+          "cpu_s": 0.02,
+          "inference_s": 5.0,
+          "label": "Long model calls",
+          "learner_s": 0.2
+        },
+        "tool_wait": {
+          "cpu_s": 0.02,
+          "inference_s": 0.05,
+          "label": "Short non-I/O stages",
+          "learner_s": 0.2
+        }
+      },
+      "reported_primary": "Equal-weight geometric total-time ratios over all 27 evaluation conditions, separately for each training profile. Also report every condition, range, regressions, and the complete identity matrix.",
+      "resource_rule": "Each tool worker represents an independently provisioned reader/backend budget with the calibration's resources. Separate workers do not secretly share one modeled bandwidth limit.",
+      "rollout_phases": [
+        "setup",
+        "model call",
+        "measured image-read job",
+        "additional tool CPU work",
+        "model call",
+        "verification",
+        "teardown"
+      ],
+      "rollouts_per_update": 32,
+      "schedule_seeds": [
+        31415,
+        27182,
+        16180,
+        14142
+      ],
+      "service_input": "A measured total replay-process duration is the service time of one synthetic image-read tool job. It is not treated as pure storage latency or as an already-measured training speedup.",
+      "service_jitter": [
+        0.75,
+        1.25
+      ],
+      "setup_s": 0.02,
+      "teardown_s": 0.01,
+      "tool_workers": 4,
+      "updates": 8,
+      "verification_s": 0.01
+    },
+    "stages": {
+      "development": {
+        "arms": [
+          "fixed16",
+          "fixed64",
+          "fixed256",
+          "fixed1024"
+        ],
+        "clients": [
+          8
+        ],
+        "expected_runs": 108,
+        "patterns": {
+          "mixed": 256,
+          "random": 128,
+          "sequential": 512
+        },
+        "profiles": [
+          "nearby",
+          "latency",
+          "contended"
+        ],
+        "seed": 27182818
+      },
+      "evaluation": {
+        "arms": [
+          "fixed16",
+          "fixed64",
+          "fixed256",
+          "fixed1024",
+          "adaptive",
+          "grow-reset"
+        ],
+        "clients": [
+          1,
+          8,
+          32
+        ],
+        "expected_runs": 486,
+        "patterns": {
+          "mixed": 256,
+          "random": 128,
+          "sequential": 512
+        },
+        "profiles": [
+          "nearby",
+          "latency",
+          "contended"
+        ],
+        "seed": 31415926
+      },
+      "identity": {
+        "arms": [
+          "fixed16",
+          "fixed64",
+          "fixed256",
+          "fixed1024",
+          "adaptive",
+          "grow-reset"
+        ],
+        "clients": [
+          8
+        ],
+        "expected_runs": 144,
+        "frontends": [
+          "concurrent",
+          "serialized"
+        ],
+        "identities": [
+          "logical",
+          "collapsed"
+        ],
+        "patterns": {
+          "mixed": 256,
+          "sequential": 512
+        },
+        "profiles": [
+          "contended"
+        ],
+        "seed": 16180339
+      }
+    },
+    "timeout_s": 60,
+    "version": "training-time-v1",
+    "workers": 4
+  },
+  "protocol_sha256": "99a629f0742f46478b1ce85a45abaa2ef1297542620d1263429f7afdd4931d33",
+  "simulator_sha256": "96196c3018a07205e57dab2c243f7d02b67fef0b29cf0e9c8df84b249a0f4fa9"
+}

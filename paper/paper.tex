@@ -20,9 +20,10 @@ still fetching files from a remote image. Reading larger chunks reduces
 requests but can waste bandwidth; smaller chunks have the opposite cost.
 We study a reader that chooses how much to fetch from recent access
 patterns and observed request cost. The question is whether this local
-decision shortens the complete training job.
-We combine measured image-read jobs with a training scheduler that includes
-model calls, tool computation, queues, and learner updates.
+decision shortens training execution outside model inference.
+We combine measured image-read jobs with a scheduler that counts setup,
+tool computation, queues, verification, teardown, and learner updates,
+while excluding inference service and its queue.
 \input{generated/abstract-result}
 The experiments explain when image-read savings reach the learner, and
 when other work absorbs them.
@@ -35,11 +36,21 @@ need files inside their sandbox. With remote-backed images, some of the
 files arrive only when read. If tools finish late, a training update can
 wait even when the learner itself is ready.
 
-DSec's microVM storage path illustrates this setting: it uses OverlayBD
-and fetches image data in 256\,KiB chunks~\cite{dsec2026}. A fixed size
-is simple, but the useful amount of data differs between a short import,
-a scattered lookup, and a sequential scan. The opportunity is to change
-the fetch size without giving the reader more cache memory.
+DSec makes the workload mismatch concrete. It reuses 3FS, its
+training-storage backend, for on-demand sandbox images. Section~5.3
+reports strong throughput for large sequential I/O but poor performance
+for small random requests~\cite{dsec2026}. DSec bridges that gap with
+local writes, local metadata where possible, and bulk reads into caches.
+Its OverlayBD/ublk path fetches 256\,KiB chunks. Agent tools, however,
+often want a few files promptly, then move to another short burst of work.
+
+This follows the familiar \emph{I/O-granularity trade-off}.
+Large fetches amortize request overhead; small ones limit read
+amplification---bytes transferred but not used. Lambda's image-loading
+study describes this same random-access versus sequential-throughput
+trade-off~\cite{lambda2023}. The opportunity is to adapt the client-side
+fetch size to the current access pattern, rather than require a new
+backend or a larger cache.
 
 Read-ahead already adapts to sequential access, as in AMP~\cite{amp2007}.
 TIP and Khameleon connect prefetching decisions to cost or expected
@@ -50,10 +61,10 @@ Our reader instead chooses a blocking refill before the next tool read
 is known. It combines likely continuation with the cost of the aligned
 windows that the current read would cross.
 
-The endpoint matters as much as the reader decision:
-\emph{does adaptive fetching reduce the time to finish the same amount
-of training work?} A faster image-read benchmark alone cannot answer
-that question.
+We therefore ask: \emph{does adaptive fetching reduce the time to finish
+the same training-execution work, excluding model inference?}
+This isolates the execution stack from model-serving latency without
+reducing the amount of tool or learner work.
 
 \input{generated/results-table}
 
@@ -86,48 +97,44 @@ and include a simple grow/reset rule. That rule increases its window on
 successive missed demands and resets after a jump. Every measurement
 checks the returned data and common resource budgets.
 
-\paragraph{From tool time to training time.}
+\paragraph{Execution time excluding inference.}
 We use each measured replay duration as the cost of one synthetic
 image-read job, not as a pure storage latency. A rollout consists of
-setup, a model call, the image-read job, additional tool computation,
-another model call, verification, and teardown. The simulator queues
-these stages behind limited actor, model, CPU, and tool-worker capacity.
+setup, the image-read job, additional tool computation, verification,
+and teardown. Model-call placeholders take zero time and bypass the
+model-worker queue. We resimulate the schedule; subtracting summed
+inference durations from overlapping work would give the wrong clock.
+Actor, CPU, and tool-worker limits remain unchanged.
 A learner update starts only after its assigned rollouts finish; the
 next update's rollouts wait for that update.
 
 Every simulated run completes the same 256 rollouts and eight learner
-updates. Policies share job order, service-time variation, non-I/O work,
-and resources. We vary the cost of model calls, tool computation, and
-learner updates to expose different reasons a training job might wait.
+updates. Policies share job order, service-time variation, non-inference
+work, and resources. We vary tool computation and learner-update cost
+to expose different reasons execution might wait.
 The clock stops after the final update, not after the last image read.
 
 Each tool worker has an independent reader/backend budget, and each
 image-read job starts with an empty reader cache. This is a controlled
 execution-time model: it does not simulate learning quality, real
 repository tasks, warm sandbox reuse, or contention inside a shared
-3FS service. Complete parameters, individual outcomes, and descriptive
-intervals are provided with the data.
+3FS service. Its clock is inference-excluded execution, not actual
+end-to-end training wall time. Complete parameters and individual
+outcomes are provided with the data.
 
-\section{What changes total training time?}
+\section{What changes execution time?}
 \input{generated/results-text}
 
-These results make the deployment question more concrete. Image
-fetching deserves attention when it delays the supply of usable
-rollouts. When model calls, CPU work, or learner updates dominate,
-moving fewer bytes is not the same as finishing training much sooner.
-Preserving the identity of independent read streams is also part of
-the design, rather than a detail to leave to the storage integration.
-
-The next step is to replace generated read jobs with captured coding-tool
-work and compare matched training runs. The current experiment answers
-the execution-time question under explicit assumptions; actual
-time-to-quality remains to be measured.
+Image fetching deserves attention when it delays usable rollouts.
+Even without inference, CPU work and learner updates can limit the gain.
+Correct stream identity remains essential. Captured coding-tool traces
+and matched training runs are needed to assess actual time-to-quality.
 
 \paragraph{Code and reproduction.}
 Source, calibration data, the full simulation matrix, and commands for
 recollecting the measurements and rebuilding this paper are public at
 \url{https://github.com/majdzayyad/agent-training-image-io}.
-Release \texttt{v1.0.0} fixes the version used here.
+Release \texttt{v1.1.0} fixes the version used here.
 
 \bibliographystyle{plainnat}
 \bibliography{background,refill}

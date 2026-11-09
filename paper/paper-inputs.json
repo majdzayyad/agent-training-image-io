@@ -1,8 +1,11 @@
 {
+  "analysis_sha256": "fdb6078d1cdf36dde78da7fcf821f05765575bbd2ca00a5a9df6fcf9309a92aa",
   "author": "Majd Zayyad",
+  "inference_accounting": "excluded",
+  "metric": "training_execution_time_excluding_inference",
   "protocol_sha256": "99a629f0742f46478b1ce85a45abaa2ef1297542620d1263429f7afdd4931d33",
-  "release": "v1.0.0",
+  "release": "v1.1.0",
   "repository": "https://github.com/majdzayyad/agent-training-image-io",
-  "simulation_rows_sha256": "d54d2e88150746be272c33705d97b2ec4849735482ad7ca17a5bc5bb2dba5018",
-  "summary_sha256": "a7ec52bbc285c89ac9d562ba3a349e634a42912fbb0424794184ac9548ccf37c"
+  "simulation_rows_sha256": "f6dedbec0aca47df9071ceb7221a1e6a627649acd3b23390f93dd861d0434edd",
+  "summary_sha256": "ad26bb1379f94f1fdde586125573e69b81a47ce6fcd334b9571dfe27d49e23ba"
 }

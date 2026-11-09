@@ -2,18 +2,20 @@
 
 **Majd Zayyad**
 
-Does a smarter image reader finish a training job sooner, or just improve an I/O benchmark?
+Does a smarter image reader finish the same training-execution work sooner, excluding model inference?
 
-This repository measures a C++ image reader, then feeds complete read-job durations into a fixed-work training scheduler. The scheduler includes model calls, tool computation, resource queues, verification, teardown and learner updates. It compares adaptive refill sizing with fixed sizes and a simple grow/reset rule.
+This repository measures a C++ image reader, then feeds complete read-job durations into a fixed-work scheduler. The current endpoint counts setup, image reads, tool computation, non-inference resource queues, verification, teardown and learner updates. Model inference is instantaneous and does not use a model-worker queue. It compares adaptive refill sizing with fixed sizes and a simple grow/reset rule.
 
-These are **simulated training-completion times**, not actual RL runs or time-to-quality measurements. No trained model, production DSec service or 3FS deployment is required.
+These are **simulated training-execution times excluding inference**, not end-to-end wall-clock training speedups, actual RL runs or time-to-quality measurements. The schedule is recomputed without inference; overlapping model-call times are not subtracted from elapsed time.
+
+DSec motivates the problem: its Section 5.3 reuses 3FS's large-I/O throughput for demand-loaded sandbox files, while reporting a small-random-I/O penalty. Workload-aware I/O granularity bridges that mismatch: large requests amortize overhead; small requests reduce read amplification for sparse or bursty access. The paper connects this to the Lambda image-loading study and adaptive read-ahead research.
 
 ## Reproduce the reported experiment
 
-Use Python 3.12. The reference-data calculation uses only the standard library:
+Use Python 3.12 on Linux or WSL. The reference-data calculation uses only the standard library:
 
 ```bash
-git clone --branch v1.0.0 https://github.com/majdzayyad/agent-training-image-io.git
+git clone --branch v1.1.0 https://github.com/majdzayyad/agent-training-image-io.git
 cd agent-training-image-io
 python3 reproduce.py --output reproduced-001
 ```
@@ -26,7 +28,9 @@ The paper is [`paper/agent-training.pdf`](paper/agent-training.pdf). To rebuild 
 python3 reproduce.py --output paper-reproduced-001 --pdf
 ```
 
-On Ubuntu 24.04, suitable packages are `texlive-latex-extra` and `texlive-fonts-recommended`. A frozen public version is available as release **v1.0.0**.
+On Ubuntu 24.04, suitable packages are `texlive-latex-extra` and `texlive-fonts-recommended`. The current paper and inference-excluded analysis are release **v1.1.0**.
+
+The inference-included study remains unchanged in **v1.0.0** and `data/reference/simulation/`. The new results are in `data/reference/non-inference-v1/`. They reuse the same physical reader measurements; no reader retuning or new measurement is implied by changing the endpoint.
 
 ## Recollect the physical reader measurements
 
@@ -57,18 +61,22 @@ The public matrix includes unfavorable conditions. In particular, stream collaps
 
 | File | Purpose |
 |---|---|
-| `experiment.json` | Workloads, resources, seeds, policy arms and training cost settings |
+| `experiment.json` | Unchanged calibration protocol and shared work/resource definitions |
+| `analysis.json` | Current endpoint, inference accounting and selected compute profiles |
 | `calibrate.py` | Non-overwriting, sequential measurement harness |
-| `simulate.py` | Event-driven actor/model/tool/CPU scheduler and matched analysis |
+| `simulate.py` | Event-driven scheduler with explicit inference inclusion/exclusion |
 | `reproduce.py` | Reference-data and fresh-measurement entry point |
 | `src/`, `include/`, `benchmarks/` | Complete reader and replay implementation |
 | `data/reference/` | Calibration records, traces, selection and full simulated outcomes |
 | `paper/` | Concise paper, source and data-driven renderer |
 | `docs/method.md` | Exact interpretation, resources, statistics and limitations |
+| `provenance/calibration-v1/` | Original analysis/test files captured by the calibration hashes |
 
-Every simulated job completes 256 rollouts and eight synchronous learner updates. Service variation and non-I/O work are paired across policies. Each tool worker has an independent measured reader/backend budget; the model does not manufacture several full-bandwidth workers on one shared bandwidth limit. It does not model actual policy learning, cross-host backend interference, warm-cache reuse, or the distribution of real coding tasks.
+Every simulated job completes 256 rollouts and eight synchronous learner updates. Non-inference service variation and work are paired across policies. The long-model-call profile is omitted from the new analysis because it becomes identical to the short-compute profile once inference and its queue are removed. All read conditions, controls and identity cases remain included.
 
-Use the results to understand **when image reads can change training completion**, not to claim a measured improvement in an existing training cluster.
+Each tool worker has an independent measured reader/backend budget; the model does not manufacture several full-bandwidth workers on one shared bandwidth limit. It does not model actual policy learning, cross-host backend interference, warm-cache reuse, or the distribution of real coding tasks.
+
+Use the results to understand **when image reads change inference-excluded execution**, not to claim the same percentage improvement in total training wall time.
 
 ## Checks
 

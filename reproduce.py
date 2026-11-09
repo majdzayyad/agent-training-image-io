@@ -77,6 +77,7 @@ def reproduce(args):
     write_new(output / "complete.json", {
         "kind": "fresh calibration and simulation" if args.fresh else "reference-data reproduction",
         "protocol_sha256": digest(ROOT / "experiment.json"),
+        "analysis_sha256": digest(ROOT / "analysis.json"),
         "simulation_summary_sha256": digest(simulation / "summary.json"),
         "paper_rendered": renderer.exists(), "pdf_requested": args.pdf,
     })

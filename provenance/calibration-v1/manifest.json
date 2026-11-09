@@ -1,0 +1,8 @@
+{
+  "source_release": "v1.0.0",
+  "purpose": "Preserve analysis/test files captured by the original reader-calibration source manifest. Reader and calibration-harness files must still match the active source.",
+  "files_sha256": {
+    "simulate.py": "1f0d645adc679dde0766ac140d6b328a31b2ae4d34092df3c621ad7332db9373",
+    "tests/test_experiment.py": "060a1d87c84d457d2e7924182027230f7eb0cc54e97bf95a08c1ca145c8b30b1"
+  }
+}
