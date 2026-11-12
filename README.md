@@ -1,3 +1,5 @@
+## [Link to paper](https://github.com/majdzayyad/agent-training-image-io/blob/main/Adaptive%20Image%20Reads%20for%20Agent%20Training%20-%20agent-training.pdf)
+
 # Adaptive Image Reads for Agent Training
 
 Does a smarter image reader finish the same training-execution work sooner, excluding model inference?
@@ -19,16 +21,6 @@ python3 reproduce.py --output reproduced-001
 ```
 
 This validates the included calibration records, reruns the complete scheduling matrix, and regenerates the paper's tables and source under `results/reproduced-001`. Choose a new label for another run; existing output is never replaced.
-
-The paper is [`paper/agent-training.pdf`](paper/agent-training.pdf). To rebuild the PDF, install LaTeX with `pdflatex`, `bibtex`, the standard recommended fonts and `microtype`, then run:
-
-```bash
-python3 reproduce.py --output paper-reproduced-001 --pdf
-```
-
-On Ubuntu 24.04, suitable packages are `texlive-latex-extra` and `texlive-fonts-recommended`. The current paper and inference-excluded analysis are release **v1.1.0**.
-
-The inference-included study remains unchanged in **v1.0.0** and `data/reference/simulation/`. The new results are in `data/reference/non-inference-v1/`. They reuse the same physical reader measurements; no reader retuning or new measurement is implied by changing the endpoint.
 
 ## Recollect the physical reader measurements
 
